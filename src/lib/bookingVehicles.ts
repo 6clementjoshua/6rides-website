@@ -20,16 +20,16 @@ function ngn(n: number) {
  * Pricing (NGN)
  */
 const PRICE_MAP: Record<string, number> = {
-    "mercedes-cla": 120_000,
-    "mercedes-c300": 100_000,
+    "mercedes-cla": 260_000,
+    "mercedes-c300": 250_000,
     "lexus-rx350-sport": 360_000,
-    "mercedes-gle-coupe": 260_000,
-    "lamborghini-urus": 1_600_000,
-    "toyota-camry": 160_000,
-    "toyota-camry-sport": 190_000,
-    "mercedes-gle": 320_000,
+    "mercedes-gle-coupe": 460_000,
+    "lamborghini-urus": 2_600_000,
+    "toyota-camry": 260_000,
+    "toyota-camry-sport": 390_000,
+    "mercedes-gle": 520_000,
     "mercedes-gwagon": 800_000,
-    "cyber-truck": 950_000,
+    "cyber-truck": 1_950_000,
 };
 
 export const BOOKING_VEHICLES: BookingVehicle[] = VEHICLES.map((v, index) => {
