@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client";
 
 import Image from "next/image";
@@ -6,6 +7,7 @@ import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import VehicleShowcase from "@/components/VehicleShowcase";
 import WaitlistModal from "@/components/WaitlistModal";
+import BookingModal from "@/components/BookingModal";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -32,16 +34,16 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-function LiquidCard({ card }: { card: StoryCard }) {
+function LiquidCard({
+  card,
+  onBook,
+}: {
+  card: StoryCard;
+  onBook: () => void;
+}) {
   const isDark = card.theme === "dark";
   const fit: MediaFit = card.fit ?? "cover";
 
-  /**
-   * WATER GLASS (ALMOST TRANSPARENT):
-   * - Very light tint
-   * - Strong blur for “water” feel
-   * - Subtle border, subtle shadow
-   */
   const waterGlass =
     "backdrop-blur-x-2 bg-black/50 border border-white/38 shadow-[0_28px_85px_rgba(50,10,0,0.18)]";
   const waterGlassDark =
@@ -64,7 +66,6 @@ function LiquidCard({ card }: { card: StoryCard }) {
     "group-hover:scale-[1.03]"
   );
 
-  // Overlay content is ALWAYS WHITE (as requested)
   const eyebrowCls = "text-[11px] font-semibold tracking-wide text-white/85";
   const titleCls = "mt-1 text-2xl font-semibold md:text-3xl text-white";
   const subtitleCls = "mt-2 text-sm md:text-[15px] text-white/78";
@@ -77,6 +78,30 @@ function LiquidCard({ card }: { card: StoryCard }) {
   const ctaOutline =
     "rounded-full border border-white/25 bg-white/5 px-5 py-2.5 text-xs font-semibold text-white transition hover:border-white/45 hover:bg-white/10";
 
+  const renderCTA = (cta: CTA) => {
+    const cls = cta.variant === "outline" ? ctaOutline : ctaSolid;
+
+    // IMPORTANT: any CTA pointing to /book opens modal (no navigation)
+    if (cta.href === "/book") {
+      return (
+        <button
+          key={cta.href + cta.label}
+          type="button"
+          onClick={onBook}
+          className={cls}
+        >
+          {cta.label}
+        </button>
+      );
+    }
+
+    return (
+      <a key={cta.href + cta.label} href={cta.href} className={cls}>
+        {cta.label}
+      </a>
+    );
+  };
+
   return (
     <motion.article
       whileHover={{ y: -6 }}
@@ -84,7 +109,6 @@ function LiquidCard({ card }: { card: StoryCard }) {
       className="group"
     >
       <div className={outer}>
-        {/* IMAGE */}
         <div className={imageStage}>
           <Image
             src={card.src}
@@ -95,19 +119,21 @@ function LiquidCard({ card }: { card: StoryCard }) {
             priority={card.key === "hero"}
           />
 
-          {/* SUPER SOFT GRADIENT (don’t darken the photo too much) */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-black/04 to-transparent" />
             <div className="absolute -left-1/4 top-0 h-full w-1/2 rotate-12 bg-white/10 blur-2xl opacity-0 transition duration-700 group-hover:opacity-100" />
           </div>
 
-          {/* WATER SEE-THROUGH HEADING BLOCK */}
           <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-            <div className={cx("max-w-3xl", isDark ? waterGlassDark : waterGlass, "rounded-2xl p-4 md:p-5")}>
+            <div
+              className={cx(
+                "max-w-3xl",
+                isDark ? waterGlassDark : waterGlass,
+                "rounded-2xl p-4 md:p-5"
+              )}
+            >
               {card.eyebrow && <div className={eyebrowCls}>{card.eyebrow}</div>}
-
               <h3 className={titleCls}>{card.title}</h3>
-
               <p className={subtitleCls}>{card.subtitle}</p>
 
               {card.chips?.length ? (
@@ -122,22 +148,13 @@ function LiquidCard({ card }: { card: StoryCard }) {
 
               {card.ctas?.length ? (
                 <div className="mt-4 flex flex-wrap gap-3">
-                  {card.ctas.map((cta) => (
-                    <a
-                      key={cta.href + cta.label}
-                      href={cta.href}
-                      className={cta.variant === "outline" ? ctaOutline : ctaSolid}
-                    >
-                      {cta.label}
-                    </a>
-                  ))}
+                  {card.ctas.map(renderCTA)}
                 </div>
               ) : null}
             </div>
           </div>
         </div>
 
-        {/* Text under image for caption/split variants (leave normal clean white section) */}
         {card.variant === "caption" && (
           <div className="bg-white border-t border-black/10 px-5 py-5 md:px-7 md:py-6">
             <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
@@ -145,32 +162,54 @@ function LiquidCard({ card }: { card: StoryCard }) {
                 {card.bullets?.length ? (
                   <ul className="mt-1 grid gap-2 text-sm text-black/65 sm:grid-cols-2">
                     {card.bullets.map((b) => (
-                      <li key={b} className="rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2">
+                      <li
+                        key={b}
+                        className="rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2"
+                      >
                         {b}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-sm text-black/65">{(card.chips ?? []).slice(0, 6).join(" • ")}</div>
+                  <div className="text-sm text-black/65">
+                    {(card.chips ?? []).slice(0, 6).join(" • ")}
+                  </div>
                 )}
               </div>
 
               {card.ctas?.length ? (
                 <div className="flex flex-wrap gap-3 lg:justify-end">
-                  {card.ctas.map((cta) => (
-                    <a
-                      key={cta.href + cta.label}
-                      href={cta.href}
-                      className={cx(
-                        "rounded-full px-5 py-2.5 text-xs font-semibold transition",
-                        cta.variant === "outline"
-                          ? "border border-black/15 text-black hover:border-black/30"
-                          : "bg-black text-white hover:bg-black/90"
-                      )}
-                    >
-                      {cta.label}
-                    </a>
-                  ))}
+                  {card.ctas.map((cta) => {
+                    const cls = cx(
+                      "rounded-full px-5 py-2.5 text-xs font-semibold transition",
+                      cta.variant === "outline"
+                        ? "border border-black/15 text-black hover:border-black/30"
+                        : "bg-black text-white hover:bg-black/90"
+                    );
+
+                    if (cta.href === "/book") {
+                      return (
+                        <button
+                          key={cta.href + cta.label}
+                          type="button"
+                          onClick={onBook}
+                          className={cls}
+                        >
+                          {cta.label}
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <a
+                        key={cta.href + cta.label}
+                        href={cta.href}
+                        className={cls}
+                      >
+                        {cta.label}
+                      </a>
+                    );
+                  })}
                 </div>
               ) : null}
             </div>
@@ -193,20 +232,37 @@ function LiquidCard({ card }: { card: StoryCard }) {
 
                 {card.ctas?.length ? (
                   <div className="mt-4 flex flex-wrap gap-3">
-                    {card.ctas.map((cta) => (
-                      <a
-                        key={cta.href + cta.label}
-                        href={cta.href}
-                        className={cx(
-                          "rounded-full px-5 py-2.5 text-xs font-semibold transition",
-                          cta.variant === "outline"
-                            ? "border border-black/15 text-black hover:border-black/30"
-                            : "bg-black text-white hover:bg-black/90"
-                        )}
-                      >
-                        {cta.label}
-                      </a>
-                    ))}
+                    {card.ctas.map((cta) => {
+                      const cls = cx(
+                        "rounded-full px-5 py-2.5 text-xs font-semibold transition",
+                        cta.variant === "outline"
+                          ? "border border-black/15 text-black hover:border-black/30"
+                          : "bg-black text-white hover:bg-black/90"
+                      );
+
+                      if (cta.href === "/book") {
+                        return (
+                          <button
+                            key={cta.href + cta.label}
+                            type="button"
+                            onClick={onBook}
+                            className={cls}
+                          >
+                            {cta.label}
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <a
+                          key={cta.href + cta.label}
+                          href={cta.href}
+                          className={cls}
+                        >
+                          {cta.label}
+                        </a>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
@@ -224,15 +280,33 @@ function LiquidCard({ card }: { card: StoryCard }) {
 
                 {card.ctas?.length ? (
                   <div className="mt-4">
-                    {card.ctas.slice(0, 1).map((cta) => (
-                      <a
-                        key={cta.href + cta.label}
-                        href={cta.href}
-                        className="block rounded-full bg-black px-5 py-3 text-center text-xs font-semibold text-white transition hover:bg-black/90"
-                      >
-                        {cta.label}
-                      </a>
-                    ))}
+                    {card.ctas.slice(0, 1).map((cta) => {
+                      const cls =
+                        "block rounded-full bg-black px-5 py-3 text-center text-xs font-semibold text-white transition hover:bg-black/90";
+
+                      if (cta.href === "/book") {
+                        return (
+                          <button
+                            key={cta.href + cta.label}
+                            type="button"
+                            onClick={onBook}
+                            className={cls}
+                          >
+                            {cta.label}
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <a
+                          key={cta.href + cta.label}
+                          href={cta.href}
+                          className={cls}
+                        >
+                          {cta.label}
+                        </a>
+                      );
+                    })}
                   </div>
                 ) : null}
               </div>
@@ -246,6 +320,9 @@ function LiquidCard({ card }: { card: StoryCard }) {
 
 export default function HomePage() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+
+  const onBook = () => setBookingOpen(true);
 
   const cards: StoryCard[] = useMemo(
     () => [
@@ -266,7 +343,6 @@ export default function HomePage() {
         theme: "dark",
         fit: "cover",
       },
-
       {
         key: "food_brand",
         src: "/images/6ride/food/6ride_food_delivery_brand_showcase.png",
@@ -589,6 +665,9 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-white text-black">
+      {/* BOOKING MODAL MOUNTED HERE (so it can open from ANY button) */}
+      <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
+
       {/* HERO */}
       <section className="relative overflow-hidden bg-black text-white">
         <div className="absolute inset-0 -z-10">
@@ -634,14 +713,16 @@ export default function HomePage() {
                 transition={{ duration: 0.9, ease: easeOut, delay: 0.25 }}
                 className="mt-8 flex flex-wrap gap-4"
               >
-                <motion.a
-                  href="/book"
+                {/* HERO BOOK BUTTON -> OPENS MODAL (NO NAVIGATION) */}
+                <motion.button
+                  type="button"
+                  onClick={onBook}
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.98 }}
                   className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
                 >
                   Book a Ride Now
-                </motion.a>
+                </motion.button>
 
                 <motion.button
                   onClick={() => setWaitlistOpen(true)}
@@ -695,96 +776,72 @@ export default function HomePage() {
                 Every scene below represents a service promise — cleaner vehicles, stronger standards, better safety culture, and a more enjoyable experience from pickup to drop-off.
               </p>
             </div>
-            
           </motion.div>
 
           <div className="mt-8 space-y-10 md:space-y-12">
             {allCards.map((card) => (
-              <LiquidCard key={card.key} card={card} />
+              <LiquidCard key={card.key} card={card} onBook={onBook} />
             ))}
           </div>
         </div>
       </section>
+
       {/* FOOTER + POLICIES */}
       <footer className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-12 md:px-12">
-          {/* BRAND */}
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-0">
-              <Image
-                src="/6logo.png"
-                alt="6Rides"
-                width={28}
-                height={28}
-                className="h-7 w-7"
-              />
+              <Image src="/6logo.png" alt="6Rides" width={28} height={28} className="h-7 w-7" />
               <span className="text-sm font-semibold">Rides</span>
             </div>
 
-            <p className="mt-1 text-sm text-black/50">
-              Premium mobility for modern Nigeria.
-            </p>
+            <p className="mt-1 text-sm text-black/50">Premium mobility for modern Nigeria.</p>
           </div>
 
-          {/* POLICIES */}
           <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-center text-[12px] font-semibold text-black/70">
             <Link href="/policies/terms" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Terms of Service
             </Link>
-
             <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Privacy Policy
             </Link>
-
             <Link href="/policies/acceptable-use" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Acceptable Use
             </Link>
-
             <Link href="/policies/safety" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Safety Guidelines
             </Link>
-
             <Link href="/policies/refunds" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Refund & Cancellation
             </Link>
-
             <Link href="/policies/subscription-billing" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Subscription & Billing
             </Link>
-
             <Link href="/policies/partner-terms" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Partner Terms
             </Link>
-
             <Link href="/policies/emergency" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Emergency Disclaimer
             </Link>
-
             <Link href="/policies/contact" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Contact
             </Link>
-
             <Link href="/policies/child-student-safety" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Child & Student Safety
             </Link>
-
             <Link href="/policies/insurance-liability" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Insurance & Liability
             </Link>
-
             <Link href="/policies/corporate-sla" target="_blank" rel="noopener noreferrer" className="hover:text-black">
               Corporate SLA
             </Link>
-
           </div>
 
-          {/* TRADEMARK */}
           <div className="mt-8 text-center text-xs text-black/50">
             © {new Date().getFullYear()} 6Rides. A 6Clement Joshua Service. All rights reserved.
           </div>
         </div>
       </footer>
-
 
       <WaitlistModal open={waitlistOpen} onClose={() => setWaitlistOpen(false)} source="hero" />
     </main>
