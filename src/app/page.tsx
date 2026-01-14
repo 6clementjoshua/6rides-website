@@ -334,7 +334,6 @@ export default function HomePage() {
         title: "Designed for real life, not just rides.",
         subtitle:
           "Shopping runs, daily movement, and smooth pickups — 6Rides is built for comfort, cleanliness, and confidence across every trip.",
-        chips: ["Clean pickups", "Premium comfort", "Schedule-ready", "Safe arrivals"],
         ctas: [
           { label: "Book now", href: "/book" },
           { label: "Contact us", href: "/contact", variant: "outline" },
@@ -370,7 +369,7 @@ export default function HomePage() {
         title: "Delivery that performs in real traffic.",
         subtitle:
           "Nigeria traffic is real — 6Rides delivery operations are built around smart routing, disciplined riders, and predictable customer updates.",
-        chips: ["Traffic-ready operations", "Reliable dispatch", "Fast city coverage", "Consistent quality", "Predictable updates"],
+        
         ctas: [{ label: "Book delivery", href: "/book" }],
         variant: "split",
         theme: "light",
@@ -384,7 +383,7 @@ export default function HomePage() {
         title: "A handover you can trust.",
         subtitle:
           "Every drop-off is treated like a brand moment — clean, respectful, and professional, so customers remember the service (and order again).",
-        chips: ["Professional delivery", "Clean handover", "Customer satisfaction", "Repeat orders"],
+        
         variant: "minimal",
         theme: "dark",
         fit: "cover",
@@ -418,7 +417,7 @@ export default function HomePage() {
         title: "Partner-listed premium cars, controlled by standards.",
         subtitle:
           "Partners list premium cars while 6Rides enforces brand standards for cleanliness, driver conduct, and rider experience — so quality stays consistent.",
-        chips: ["Premium partners", "Brand standards", "Monthly earning model", "Quality control"],
+        
         ctas: [
           { label: "Partner with 6Rides", href: "/partners" },
           { label: "Book now", href: "/book", variant: "outline" },
@@ -448,7 +447,7 @@ export default function HomePage() {
         eyebrow: "Partner vehicles • Premium SUV",
         title: "SUV class for executive comfort.",
         subtitle: "Perfect for premium pickups, business movement, and higher-comfort trips — when you want more than a basic ride.",
-        chips: ["Executive comfort", "SUV class", "Smooth experience", "Clean interior"],
+        
         variant: "minimal",
         theme: "dark",
         fit: "cover",
@@ -460,7 +459,7 @@ export default function HomePage() {
         eyebrow: "Partner vehicles • Premium sedan",
         title: "Premium sedans that look as good as they ride.",
         subtitle: "For airport runs, meetings, and night movement — premium sedans give you a cleaner arrival, better comfort, and a more confident experience.",
-        chips: ["Meetings", "Airport runs", "Night mobility", "Comfort", "Better arrivals"],
+        
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "split",
         theme: "light",
@@ -486,7 +485,7 @@ export default function HomePage() {
         eyebrow: "Partner vehicles • Premium badge",
         title: "Premium rides, premium standards — every time.",
         subtitle: "6Rides targets consistency: verified drivers, higher service expectations, and the kind of ride you’re proud to step out of.",
-        chips: ["Verified drivers", "Higher standards", "Premium feel", "Proud arrivals"],
+        
         variant: "minimal",
         theme: "dark",
         fit: "cover",
@@ -514,7 +513,7 @@ export default function HomePage() {
         eyebrow: "Urban mobility • Night rides",
         title: "Night rides you can trust.",
         subtitle: "When traffic is dense and visibility is low, you want a service built around compliance, safe driving, and quick support when needed.",
-        chips: ["Night safety", "Urban reliability", "Support-ready", "Compliance", "Safer trips"],
+        
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "split",
         theme: "light",
@@ -542,7 +541,7 @@ export default function HomePage() {
         eyebrow: "Operations • Fleet readiness",
         title: "Fleet readiness for scheduled operations.",
         subtitle: "Airport transfers and scheduled trips depend on reliability. 6Rides is structured to run fleet operations with discipline and predictable service.",
-        chips: ["Scheduled rides", "Airport transfers", "Fleet discipline", "Reliable dispatch"],
+        
         ctas: [
           { label: "Book now", href: "/book" },
           { label: "Corporate accounts", href: "/contact", variant: "outline" },
@@ -576,7 +575,7 @@ export default function HomePage() {
         eyebrow: "Brand moments • Pickup points",
         title: "Clean pickups at premium venues.",
         subtitle: "From restaurants to lounges and events — the pickup experience matters. 6Rides is designed to feel premium where people actually live and socialize.",
-        chips: ["Premium venues", "Clean pickup", "Brand presence", "Smooth exit"],
+        
         variant: "overlay",
         theme: "dark",
         fit: "cover",
@@ -589,7 +588,7 @@ export default function HomePage() {
         eyebrow: "Lifestyle • Family movement",
         title: "Family trips made smoother.",
         subtitle: "When comfort matters — family outings, weekend trips, lifestyle movement — 6Rides supports clean rides and calmer travel moments.",
-        chips: ["Family-friendly", "Comfort", "Clean ride", "Weekend-ready", "Safe arrivals"],
+
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "split",
         theme: "light",
@@ -631,7 +630,7 @@ export default function HomePage() {
         eyebrow: "Premium fleet • Highway performance",
         title: "Premium performance when you’re moving long distance.",
         subtitle: "For highway travel and inter-city movement, premium comfort and calm handling change the entire experience — less stress, better control, better travel.",
-        chips: ["Highway comfort", "Premium handling", "Long-distance feel", "Stable experience"],
+
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "minimal",
         theme: "dark",
@@ -650,7 +649,7 @@ export default function HomePage() {
       title: "A partner program designed to scale.",
       subtitle:
         "6Rides gives premium car owners a structured system: brand standards, premium positioning, and a monthly earning model tied to utilization — built to grow city-by-city.",
-      chips: ["Monthly payouts", "Premium positioning", "Brand standards", "City-by-city expansion", "Partner growth"],
+      
       ctas: [
         { label: "Partner with 6Rides", href: "/partners" },
         { label: "Investor overview", href: "/investors", variant: "outline" },
