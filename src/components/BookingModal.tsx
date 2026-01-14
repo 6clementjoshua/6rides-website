@@ -29,10 +29,11 @@ export default function BookingModal({
 }) {
     const cars = BOOKING_VEHICLES;
 
-    const [selectedId, setSelectedId] = useState(cars[0]?.id ?? "");
+    // IMPORTANT: use uid for UI selection (guaranteed unique)
+    const [selectedUid, setSelectedUid] = useState(cars[0]?.uid ?? "");
     const selected = useMemo<BookingVehicle | undefined>(
-        () => cars.find((c) => c.id === selectedId) ?? cars[0],
-        [cars, selectedId]
+        () => cars.find((c) => c.uid === selectedUid) ?? cars[0],
+        [cars, selectedUid]
     );
 
     const [step, setStep] = useState<Step>("booking");
@@ -74,7 +75,22 @@ export default function BookingModal({
     }
 
     async function detectLocation() {
-        if (!navigator.geolocation) return;
+        // Common reason it "doesn't work": site is not https (or localhost)
+        if (typeof window !== "undefined") {
+            const isSecure = window.isSecureContext;
+            if (!isSecure) {
+                setResultMsg("Location needs HTTPS (or localhost). Please open the site on https:// and try again.");
+                setStep("result");
+                return;
+            }
+        }
+
+        if (!navigator.geolocation) {
+            setResultMsg("Geolocation is not supported on this device/browser.");
+            setStep("result");
+            return;
+        }
+
         setGeoBusy(true);
 
         navigator.geolocation.getCurrentPosition(
@@ -82,16 +98,36 @@ export default function BookingModal({
                 setPickup(toLatLngString(pos));
                 setGeoBusy(false);
             },
-            () => setGeoBusy(false),
-            { enableHighAccuracy: true, timeout: 12000 }
+            (err) => {
+                // Useful messages for users
+                const msg =
+                    err.code === err.PERMISSION_DENIED
+                        ? "Location permission denied. Please allow location access in your browser settings."
+                        : err.code === err.POSITION_UNAVAILABLE
+                            ? "Location unavailable. Please turn on GPS/location services and try again."
+                            : "Location request timed out. Please try again.";
+
+                setResultMsg(msg);
+                setStep("result");
+                setGeoBusy(false);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
     }
+
+    const isFormValid =
+        !!selected &&
+        name.trim().length > 0 &&
+        email.trim().length > 0 &&
+        pickup.trim().length > 0 &&
+        dropoff.trim().length > 0; // DESTINATION REQUIRED
 
     async function submitBooking() {
         if (!selected) return;
 
-        if (!name.trim() || !email.trim()) {
-            setResultMsg("Please enter your name and email to continue.");
+        // enforce required fields
+        if (!isFormValid) {
+            setResultMsg("Please complete all required fields: Name, Email, Pickup location, and Destination.");
             setStep("result");
             return;
         }
@@ -107,9 +143,10 @@ export default function BookingModal({
                     email,
                     phone,
                     pickup_location: pickup,
-                    dropoff_location: dropoff,
+                    dropoff_location: dropoff, // now required
                     notes,
-                    vehicle_id: selected.id,
+                    // IMPORTANT: send baseId to API (not uid)
+                    vehicle_id: selected.baseId,
                 }),
             });
 
@@ -136,9 +173,7 @@ export default function BookingModal({
 
     function scheduleAnswer(answer: "yes" | "no") {
         if (answer === "no") {
-            setScheduleResult(
-                "Scheduling is reserved for returning customers. New customers can only book a ride. Thank you — 6Rides."
-            );
+            setScheduleResult("Scheduling is reserved for returning customers. New customers can only book a ride. Thank you — 6Rides.");
             setStep("schedule_result");
             return;
         }
@@ -146,7 +181,6 @@ export default function BookingModal({
     }
 
     function submitScheduleForm() {
-        // Always NOT FOUND per your rule.
         setScheduleResult(
             "Not found. We could not verify your past ride history at this time. Scheduling is unavailable right now. This verification helps us serve returning customers properly. Thank you — 6Rides."
         );
@@ -175,7 +209,6 @@ export default function BookingModal({
                 <motion.div className={overlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                     <div className="min-h-screen w-full overflow-y-auto px-4 py-10">
                         <div className="flex min-h-[calc(100vh-80px)] items-start justify-center md:items-center">
-
                             <motion.div
                                 className={modalShell}
                                 initial={{ opacity: 0, y: 18, scale: 0.98 }}
@@ -195,8 +228,8 @@ export default function BookingModal({
                                 </div>
 
                                 <div className={cx("relative", glassInner)}>
-                                    <div className="max-h-[calc(100vh-48px)] overflow-y-auto p-4 md:p-6">
-
+                                    {/* Make the inner scrollable too */}
+                                    <div className="six-scroll max-h-[calc(100vh-48px)] overflow-y-auto p-4 md:p-6">
                                         <div className="flex items-center justify-between gap-4">
                                             <div className="flex items-center gap-3">
                                                 <Image src="/6logo.PNG" alt="6Rides" width={38} height={38} className="h-10 w-10 rounded-2xl bg-white p-2" />
@@ -212,77 +245,84 @@ export default function BookingModal({
                                         </div>
 
                                         <div className="mt-5 grid gap-6 md:grid-cols-[1fr_360px]">
-                                            {/* Left: selector + preview */}
-                                            <div className="rounded-3xl border border-white/10 bg-black/35 p-4">
+                                            {/* Left: selector with inline preview */}
+                                            <div className="rounded-3xl border border-white/10 bg-black p-4">
                                                 <div className="flex items-center justify-between">
                                                     <div className="text-sm font-semibold text-white/85">Select a vehicle</div>
                                                     <div className="text-xs text-white/55">
-                                                        {selected?.priceLabel}{" "}
-                                                        <span className="text-white/35">•</span>{" "}
+                                                        {selected?.priceLabel} <span className="text-white/35">•</span>{" "}
                                                         <span className="text-white/60">{selected?.badge ?? ""}</span>
                                                     </div>
                                                 </div>
 
-                                                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                                                <div className="six-scroll mt-3 max-h-[520px] overflow-y-auto pr-1">
                                                     <div className="space-y-2">
                                                         {cars.map((c) => {
-                                                            const active = c.id === selectedId;
-                                                            return (
-                                                                <button
-                                                                    key={c.id}
-                                                                    type="button"
-                                                                    onClick={() => setSelectedId(c.id)}
-                                                                    className={cx(
-                                                                        "w-full rounded-2xl border px-3 py-3 text-left transition",
-                                                                        active ? "border-white/35 bg-white/10" : "border-white/10 bg-white/5 hover:border-white/20"
-                                                                    )}
-                                                                >
-                                                                    <div className="flex items-center gap-3">
-                                                                        <div className="relative h-11 w-14 overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                                                                            {/* transparent PNGs look best with contain */}
-                                                                            <Image src={c.image} alt={c.name} fill className="object-contain p-1" />
-                                                                        </div>
-                                                                        <div className="min-w-0">
-                                                                            <div className="truncate text-sm font-semibold">{c.name}</div>
-                                                                            <div className="mt-0.5 text-xs text-white/60">{c.priceLabel}</div>
-                                                                        </div>
-                                                                    </div>
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
+                                                            const active = c.uid === selectedUid;
 
-                                                    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-                                                        <AnimatePresence mode="wait">
-                                                            <motion.div
-                                                                key={selected?.id}
-                                                                initial={{ x: 220, opacity: 0.0 }}
-                                                                animate={{ x: 0, opacity: 1 }}
-                                                                exit={{ x: -220, opacity: 0.0 }}
-                                                                transition={{ duration: 0.32, ease: easeOut }}
-                                                                className="relative h-[260px] w-full"
-                                                            >
-                                                                {selected ? (
-                                                                    <>
-                                                                        <div className="absolute inset-0">
-                                                                            <Image src={selected.image} alt={selected.name} fill className="object-contain p-6" />
-                                                                        </div>
-                                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-                                                                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                                                                            <div className="text-sm font-semibold">{selected.name}</div>
-                                                                            <div className="text-xs text-white/70">
-                                                                                {selected.priceLabel} • {selected.badge ?? "Premium"}
+                                                            return (
+                                                                <div key={c.uid} className="rounded-2xl border border-white/10 bg-white/5">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setSelectedUid(c.uid)}
+                                                                        className={cx("w-full rounded-2xl px-3 py-3 text-left transition", active ? "bg-white/10" : "hover:bg-white/7")}
+                                                                    >
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="relative h-11 w-14 overflow-hidden rounded-xl border border-white/10 bg-black">
+                                                                                <Image src={c.image} alt={c.name} fill className="object-contain p-1" />
+                                                                            </div>
+
+                                                                            <div className="min-w-0 flex-1">
+                                                                                <div className="truncate text-sm font-semibold text-white/90">{c.name}</div>
+                                                                                <div className="mt-0.5 text-xs text-white/60">{c.priceLabel}</div>
+                                                                            </div>
+
+                                                                            <div
+                                                                                className={cx(
+                                                                                    "rounded-full border px-3 py-1 text-[11px] font-semibold",
+                                                                                    active ? "border-white/25 bg-white/10 text-white/80" : "border-white/10 bg-white/5 text-white/55"
+                                                                                )}
+                                                                            >
+                                                                                {c.badge ?? "Premium"}
                                                                             </div>
                                                                         </div>
-                                                                    </>
-                                                                ) : null}
-                                                            </motion.div>
-                                                        </AnimatePresence>
+                                                                    </button>
+
+                                                                    <AnimatePresence initial={false}>
+                                                                        {active ? (
+                                                                            <motion.div
+                                                                                key={`preview-${c.uid}`}
+                                                                                initial={{ height: 0, opacity: 0 }}
+                                                                                animate={{ height: "auto", opacity: 1 }}
+                                                                                exit={{ height: 0, opacity: 0 }}
+                                                                                transition={{ duration: 0.28, ease: easeOut }}
+                                                                                className="overflow-hidden"
+                                                                            >
+                                                                                <div className="border-t border-white/10 bg-black/60 p-3">
+                                                                                    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black">
+                                                                                        <div className="relative h-[210px] w-full">
+                                                                                            <Image src={c.image} alt={c.name} fill className="object-contain p-5" />
+                                                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                                                                                            <div className="absolute bottom-0 left-0 right-0 p-3">
+                                                                                                <div className="text-sm font-semibold text-white">{c.name}</div>
+                                                                                                <div className="text-xs text-white/70">
+                                                                                                    {c.priceLabel} • {c.badge ?? "Premium"}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </motion.div>
+                                                                        ) : null}
+                                                                    </AnimatePresence>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Right: form + flow */}
+                                            {/* Right: form */}
                                             <div className="rounded-3xl border border-white/10 bg-black/35 p-4">
                                                 {step === "booking" ? (
                                                     <>
@@ -290,12 +330,12 @@ export default function BookingModal({
 
                                                         <div className="mt-4 grid gap-4">
                                                             <div>
-                                                                <div className={label}>Full name</div>
+                                                                <div className={label}>Full name *</div>
                                                                 <input value={name} onChange={(e) => setName(e.target.value)} className={field} placeholder="Your name" />
                                                             </div>
 
                                                             <div>
-                                                                <div className={label}>Email</div>
+                                                                <div className={label}>Email *</div>
                                                                 <input value={email} onChange={(e) => setEmail(e.target.value)} className={field} placeholder="you@email.com" />
                                                             </div>
 
@@ -305,7 +345,7 @@ export default function BookingModal({
                                                             </div>
 
                                                             <div>
-                                                                <div className={label}>Pickup location</div>
+                                                                <div className={label}>Pickup location *</div>
                                                                 <div className="mt-2 flex gap-2">
                                                                     <button type="button" onClick={detectLocation} disabled={geoBusy} className={btnOutline}>
                                                                         {geoBusy ? "Detecting..." : "Use my location"}
@@ -320,7 +360,7 @@ export default function BookingModal({
                                                             </div>
 
                                                             <div>
-                                                                <div className={label}>Destination (optional)</div>
+                                                                <div className={label}>Destination *</div>
                                                                 <input value={dropoff} onChange={(e) => setDropoff(e.target.value)} className={field} placeholder="Where to?" />
                                                             </div>
 
@@ -331,7 +371,7 @@ export default function BookingModal({
                                                         </div>
 
                                                         <div className="mt-5 flex flex-wrap gap-3">
-                                                            <button type="button" onClick={submitBooking} disabled={busy} className={btnSolid}>
+                                                            <button type="button" onClick={submitBooking} disabled={busy || !isFormValid} className={btnSolid}>
                                                                 {busy ? "Submitting..." : "Book"}
                                                             </button>
                                                             <button type="button" onClick={openSchedule} className={btnOutline}>
@@ -339,8 +379,8 @@ export default function BookingModal({
                                                             </button>
                                                         </div>
 
-                                                        <div className="mt-4 text-xs text-white/55">
-                                                            You’ll receive a branded email summary (vehicle image + price + locations) with a subscribe button for availability updates.
+                                                        <div className="mt-3 text-xs text-white/55">
+                                                            Required fields: Name, Email, Pickup, Destination.
                                                         </div>
                                                     </>
                                                 ) : null}
@@ -353,13 +393,12 @@ export default function BookingModal({
                                                         </div>
 
                                                         <div className="mt-4 text-xs text-white/55">
-                                                            We emailed your full request summary. Reference:{" "}
-                                                            <span className="font-semibold text-white/75">{attemptId ?? "—"}</span>
+                                                            Reference: <span className="font-semibold text-white/75">{attemptId ?? "—"}</span>
                                                         </div>
 
                                                         <div className="mt-5 flex flex-wrap gap-3">
                                                             <button type="button" className={btnOutline} onClick={() => setStep("booking")}>
-                                                                Try another vehicle
+                                                                Back to booking
                                                             </button>
                                                             <button type="button" className={btnSolid} onClick={close}>
                                                                 Done
@@ -445,6 +484,28 @@ export default function BookingModal({
                             </motion.div>
                         </div>
                     </div>
+
+                    <style jsx global>{`
+            .six-scroll {
+              scrollbar-width: thin;
+              scrollbar-color: rgba(0, 0, 0, 0.95) rgba(255, 255, 255, 0.06);
+            }
+            .six-scroll::-webkit-scrollbar {
+              width: 10px;
+            }
+            .six-scroll::-webkit-scrollbar-track {
+              background: rgba(255, 255, 255, 0.06);
+              border-radius: 999px;
+            }
+            .six-scroll::-webkit-scrollbar-thumb {
+              background: rgba(0, 0, 0, 0.95);
+              border-radius: 999px;
+              border: 2px solid rgba(255, 255, 255, 0.06);
+            }
+            .six-scroll::-webkit-scrollbar-thumb:hover {
+              background: rgba(0, 0, 0, 1);
+            }
+          `}</style>
                 </motion.div>
             ) : null}
         </AnimatePresence>

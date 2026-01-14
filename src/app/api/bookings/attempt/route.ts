@@ -5,6 +5,10 @@ import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 import { BOOKING_VEHICLES } from "@/lib/bookingVehicles";
 
+// IMPORTANT: ensure Node runtime (crypto + resend)
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 function mustGet(name: string) {
     const v = process.env[name];
     if (!v) throw new Error(`Missing env: ${name}`);
@@ -98,8 +102,9 @@ function bookingEmailHTML(args: {
 
           <tr>
             <td align="center" style="padding:10px 0 18px;">
-              <img src="https://bhgasznglvennqqqthvs.supabase.co/storage/v1/object/public/public-assets/6logo.PNG" width="56" height="56" alt="6Rides" style="
-                display:block;border-radius:16px;padding:10px;background:#ffffff;box-shadow:0 10px 30px rgba(0,0,0,.25);" />
+              <img src="https://bhgasznglvennqqqthvs.supabase.co/storage/v1/object/public/public-assets/6logo.PNG"
+                width="56" height="56" alt="6Rides"
+                style="display:block;border-radius:16px;padding:10px;background:#ffffff;box-shadow:0 10px 30px rgba(0,0,0,.25);" />
             </td>
           </tr>
 
@@ -142,8 +147,7 @@ function bookingEmailHTML(args: {
                         <td style="width:140px;vertical-align:top;padding-right:14px;">
                           <img
                             src="${escapeHtml(args.selected_car_image_url)}"
-                            width="140"
-                            height="96"
+                            width="140" height="96"
                             alt="${escapeHtml(args.selected_car_name)}"
                             style="display:block;width:140px;height:96px;object-fit:contain;border-radius:16px;border:1px solid rgba(0,0,0,.08);background:rgba(0,0,0,.02);"
                           />
@@ -217,11 +221,25 @@ function bookingEmailHTML(args: {
 
 export async function POST(req: Request) {
     try {
+        // Match working waitlist pattern where possible
         const RESEND_API_KEY = mustGet("RESEND_API_KEY");
-        const RESEND_FROM = mustGet("RESEND_FROM");
-        const SUPABASE_URL = mustGet("SUPABASE_URL");
-        const SUPABASE_SERVICE_ROLE_KEY = mustGet("SUPABASE_SERVICE_ROLE_KEY");
+        const BOOKING_TOKEN_SECRET = mustGet("BOOKING_TOKEN_SECRET");
+        void BOOKING_TOKEN_SECRET; // ensures it is present
+
+        // IMPORTANT: many projects only have NEXT_PUBLIC_SUPABASE_URL (like your working waitlist)
+        const SUPABASE_URL =
+            process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (!SUPABASE_URL) throw new Error("Missing env: SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)");
+
+        const SUPABASE_SERVICE_ROLE_KEY =
+            process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (!SUPABASE_SERVICE_ROLE_KEY) throw new Error("Missing env: SUPABASE_SERVICE_ROLE_KEY");
+
         const SITE_URL = mustGet("NEXT_PUBLIC_SITE_URL").replace(/\/$/, "");
+
+        // Prefer a known-good verified sender like your waitlist route.
+        // If RESEND_FROM is present, use it; otherwise fallback.
+        const RESEND_FROM = process.env.RESEND_FROM || "6Rides <no-reply@6rides.com>";
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
             auth: { persistSession: false },
@@ -236,13 +254,17 @@ export async function POST(req: Request) {
         const pickup_location = String(body?.pickup_location ?? "").trim();
         const dropoff_location = String(body?.dropoff_location ?? "").trim();
         const notes = String(body?.notes ?? "").trim();
-        const vehicle_id = String(body?.vehicle_id ?? "").trim();
+        const vehicle_id = String(body?.vehicle_id ?? "").trim(); // baseId from modal
 
         if (!name || !email || !vehicle_id) {
             return NextResponse.json({ ok: false, error: "Missing required fields" }, { status: 400 });
         }
 
-        const vehicle = BOOKING_VEHICLES.find((v) => v.id === vehicle_id);
+        // FIX: bookingVehicles now uses baseId/uid; API receives baseId
+        const vehicle =
+            (BOOKING_VEHICLES as any).find((v: any) => v.baseId === vehicle_id) ??
+            BOOKING_VEHICLES.find((v: any) => v.id === vehicle_id);
+
         if (!vehicle) {
             return NextResponse.json({ ok: false, error: "Vehicle not found" }, { status: 400 });
         }
@@ -250,6 +272,9 @@ export async function POST(req: Request) {
         const availability_message =
             `Hello ${name}. Sorry, this ride is in use. ${vehicle.name} is currently unavailable due to high demand and ongoing orders. ` +
             `Please try other rides and do well to book early next time. Thank you — 6Rides.`;
+
+        const carImageAbs =
+            `${SITE_URL}${String(vehicle.image ?? "").startsWith("/") ? vehicle.image : `/${vehicle.image}`}`;
 
         const { data: inserted, error: insErr } = await supabase
             .from("booking_attempts")
@@ -260,10 +285,10 @@ export async function POST(req: Request) {
                 pickup_location,
                 dropoff_location,
                 notes,
-                car_key: vehicle.id,
+                car_key: vehicle.baseId ?? vehicle.id,
                 car_name: vehicle.name,
                 car_price: vehicle.priceLabel,
-                car_image_url: vehicle.image,
+                car_image_url: carImageAbs, // store absolute for safety
                 availability_status: "unavailable",
                 availability_message,
             })
@@ -271,7 +296,11 @@ export async function POST(req: Request) {
             .single();
 
         if (insErr || !inserted?.id) {
-            return NextResponse.json({ ok: false, error: "Failed to save booking attempt" }, { status: 500 });
+            console.error("Supabase insert error (booking_attempts):", insErr);
+            return NextResponse.json(
+                { ok: false, error: "Failed to save booking attempt", detail: insErr?.message ?? null },
+                { status: 500 }
+            );
         }
 
         const token = signToken({ email, attempt_id: inserted.id, ts: Date.now() });
@@ -287,24 +316,41 @@ export async function POST(req: Request) {
             notes,
             selected_car_name: vehicle.name,
             selected_car_price: vehicle.priceLabel,
-            selected_car_image_url: `${SITE_URL}${vehicle.image.startsWith("/") ? vehicle.image : `/${vehicle.image}`}`,
+            selected_car_image_url: carImageAbs,
             availability_message,
             subscribe_url,
         });
 
-        await resend.emails.send({
+        // FIX: check resend result and return real error if it fails (and log it)
+        const { data: sent, error: sendErr } = await resend.emails.send({
             from: RESEND_FROM,
-            to: email,
+            to: email, // keep same as waitlist (string), not array
             subject: "6Rides Booking Update — Unavailable right now",
             html,
         });
+
+        if (sendErr) {
+            console.error("Resend send error (booking):", sendErr);
+            return NextResponse.json(
+                {
+                    ok: false,
+                    error: "Email failed to send",
+                    resend_message: sendErr.message,
+                    attempt_id: inserted.id,
+                    from: RESEND_FROM,
+                },
+                { status: 502 }
+            );
+        }
 
         return NextResponse.json({
             ok: true,
             attempt_id: inserted.id,
             availability_message,
+            resend_id: sent?.id ?? null,
         });
     } catch (e: any) {
+        console.error("Booking route error:", e);
         return NextResponse.json({ ok: false, error: e?.message ?? "Server error" }, { status: 500 });
     }
 }

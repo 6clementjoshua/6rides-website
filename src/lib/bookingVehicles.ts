@@ -2,6 +2,12 @@
 import { VEHICLES, type VehicleItem } from "@/lib/vehicles";
 
 export type BookingVehicle = VehicleItem & {
+    // stable id used for booking/API
+    baseId: string;
+
+    // guaranteed unique id for UI keys/selection
+    uid: string;
+
     priceNgn: number;
     priceLabel: string;
 };
@@ -11,13 +17,7 @@ function ngn(n: number) {
 }
 
 /**
- * Pricing (NGN) per your instructions:
- * - CLA: 120k
- * - C300: 60k
- * - Mercedes GLE Coupé: 260k
- * - RX 350 Sport: 360k
- * - Urus: 1.6m
- * - Others: assigned based on fuel/segment within 160k–1.6m range
+ * Pricing (NGN)
  */
 const PRICE_MAP: Record<string, number> = {
     "mercedes-cla": 120_000,
@@ -32,7 +32,17 @@ const PRICE_MAP: Record<string, number> = {
     "cyber-truck": 950_000,
 };
 
-export const BOOKING_VEHICLES: BookingVehicle[] = VEHICLES.map((v) => {
-    const priceNgn = PRICE_MAP[v.id] ?? 200_000;
-    return { ...v, priceNgn, priceLabel: ngn(priceNgn) };
+export const BOOKING_VEHICLES: BookingVehicle[] = VEHICLES.map((v, index) => {
+    const baseId = String(v.id ?? "").trim() || `vehicle-${index}`;
+    const uid = `${baseId}__${index}`; // GUARANTEED UNIQUE
+
+    const priceNgn = PRICE_MAP[baseId] ?? 200_000;
+
+    return {
+        ...v,
+        baseId,
+        uid,
+        priceNgn,
+        priceLabel: ngn(priceNgn),
+    };
 });
