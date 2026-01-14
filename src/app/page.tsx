@@ -36,6 +36,46 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
+function summarizeList(items: string[] | undefined, max = 6) {
+  const arr = (items ?? []).filter(Boolean);
+  if (!arr.length) return "";
+  return arr.slice(0, max).join(" • ");
+}
+
+/**
+ * Enticing, short summaries for the WHITE bottom section.
+ * No buttons here. User should use the overlay CTA (Learn more / Book now).
+ */
+function enticer(
+  type: "caption" | "split_get" | "split_switch",
+  card: StoryCard
+) {
+  const bulletsSummary = summarizeList(card.bullets, 6);
+  const chipsSummary = summarizeList(card.chips, 6);
+
+  const base =
+    bulletsSummary ||
+    chipsSummary ||
+    "A cleaner, calmer experience with disciplined standards — designed for premium movement.";
+
+  if (type === "caption") {
+    return `${base} Tap “Learn more” on the card to see the full breakdown.`;
+  }
+
+  if (type === "split_get") {
+    return (
+      bulletsSummary ||
+      "Cleaner vehicles, calmer pickups, and a more premium end-to-end experience — without the noise."
+    );
+  }
+
+  // split_switch
+  return (
+    chipsSummary ||
+    "People switch for reliability, presentation, and standards you can feel from pickup to drop-off."
+  );
+}
+
 function LiquidCard({
   card,
   onBook,
@@ -46,7 +86,6 @@ function LiquidCard({
   const isDark = card.theme === "dark";
 
   // Mobile priority: show full image (no crop), desktop remains premium cover.
-  // If card.fit is explicitly "contain", keep contain everywhere.
   const fit: MediaFit = card.fit ?? "cover";
 
   const waterGlass =
@@ -65,9 +104,7 @@ function LiquidCard({
 
   const imageClass = cx(
     "h-full w-full object-center transition duration-700 ease-out",
-    // Mobile: contain for full visibility; Desktop: keep the original look.
     fit === "contain" ? "object-contain" : "object-contain md:object-cover",
-    // Remove zoom on mobile; keep mild zoom on desktop hover only.
     "md:group-hover:scale-[1.03]"
   );
 
@@ -78,7 +115,7 @@ function LiquidCard({
   const chipCls =
     "rounded-full px-3 py-1 text-[11px] font-semibold border border-white/14 bg-white/10 text-white/85";
 
-  // Desktop stays as-is; Mobile becomes smaller pill size.
+  // Overlay CTAs only (these are on the image card).
   const ctaSolid =
     "rounded-full bg-white px-3.5 py-2 text-[11px] font-semibold text-black transition hover:bg-white/90 md:px-5 md:py-2.5 md:text-xs";
   const ctaOutline =
@@ -97,10 +134,9 @@ function LiquidCard({
     return base;
   };
 
-  const renderCTA = (cta: CTA) => {
+  const renderOverlayCTA = (cta: CTA) => {
     const cls = cta.variant === "outline" ? ctaOutline : ctaSolid;
 
-    // IMPORTANT: any CTA pointing to /book opens modal (no navigation)
     if (cta.href === "/book") {
       return (
         <button
@@ -121,7 +157,8 @@ function LiquidCard({
     );
   };
 
-  const topCtas = withLearnMore(card.ctas);
+  // ✅ ONLY overlay gets CTAs. WHITE bottom section never gets CTAs.
+  const overlayCtas = withLearnMore(card.ctas);
 
   return (
     <motion.article
@@ -167,74 +204,25 @@ function LiquidCard({
                 </div>
               ) : null}
 
-              {topCtas.length ? (
+              {overlayCtas.length ? (
                 <div className="mt-4 flex flex-wrap gap-2.5 md:gap-3">
-                  {topCtas.map(renderCTA)}
+                  {overlayCtas.map(renderOverlayCTA)}
                 </div>
               ) : null}
             </div>
           </div>
         </div>
 
+        {/* ✅ WHITE SECTION: NO BUTTONS AT ALL (book/learn removed everywhere here) */}
         {card.variant === "caption" && (
           <div className="bg-white border-t border-black/10 px-5 py-5 md:px-7 md:py-6">
-            <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
-              <div className="w-full">
-                {card.bullets?.length ? (
-                  <ul className="mt-1 grid gap-2 text-sm text-black/65 sm:grid-cols-2">
-                    {card.bullets.map((b) => (
-                      <li
-                        key={b}
-                        className="rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2"
-                      >
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="text-sm text-black/65">
-                    {(card.chips ?? []).slice(0, 6).join(" • ")}
-                  </div>
-                )}
+            <div className="grid gap-2">
+              <div className="text-sm font-semibold text-black/85">
+                Quick summary
               </div>
-
-              {withLearnMore(card.ctas).length ? (
-                <div className="flex flex-wrap gap-2.5 md:gap-3 lg:justify-end">
-                  {withLearnMore(card.ctas).map((cta) => {
-                    const cls = cx(
-                      "rounded-full font-semibold transition",
-                      // Mobile smaller pills; Desktop unchanged
-                      "px-3.5 py-2 text-[11px] md:px-5 md:py-2.5 md:text-xs",
-                      cta.variant === "outline"
-                        ? "border border-black/15 text-black hover:border-black/30"
-                        : "bg-black text-white hover:bg-black/90"
-                    );
-
-                    if (cta.href === "/book") {
-                      return (
-                        <button
-                          key={cta.href + cta.label}
-                          type="button"
-                          onClick={onBook}
-                          className={cls}
-                        >
-                          {cta.label}
-                        </button>
-                      );
-                    }
-
-                    return (
-                      <a
-                        key={cta.href + cta.label}
-                        href={cta.href}
-                        className={cls}
-                      >
-                        {cta.label}
-                      </a>
-                    );
-                  })}
-                </div>
-              ) : null}
+              <div className="text-sm text-black/65 leading-relaxed">
+                {enticer("caption", card)}
+              </div>
             </div>
           </div>
         )}
@@ -244,100 +232,28 @@ function LiquidCard({
             <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
               <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
                 <div className="text-sm font-semibold">What you get</div>
-                <div className="mt-2 grid gap-2 text-sm text-black/65 sm:grid-cols-2">
-                  {(card.chips ?? []).slice(0, 6).map((c) => (
-                    <div key={c} className="flex items-start gap-2">
-                      <span className="mt-1.5 h-2 w-2 rounded-full bg-black/70" />
-                      <span>{c}</span>
-                    </div>
-                  ))}
+                <div className="mt-2 text-sm text-black/65 leading-relaxed">
+                  {enticer("split_get", card)}
                 </div>
-
-                {withLearnMore(card.ctas).length ? (
-                  <div className="mt-4 flex flex-wrap gap-2.5 md:gap-3">
-                    {withLearnMore(card.ctas).map((cta) => {
-                      const cls = cx(
-                        "rounded-full font-semibold transition",
-                        "px-3.5 py-2 text-[11px] md:px-5 md:py-2.5 md:text-xs",
-                        cta.variant === "outline"
-                          ? "border border-black/15 text-black hover:border-black/30"
-                          : "bg-black text-white hover:bg-black/90"
-                      );
-
-                      if (cta.href === "/book") {
-                        return (
-                          <button
-                            key={cta.href + cta.label}
-                            type="button"
-                            onClick={onBook}
-                            className={cls}
-                          >
-                            {cta.label}
-                          </button>
-                        );
-                      }
-
-                      return (
-                        <a
-                          key={cta.href + cta.label}
-                          href={cta.href}
-                          className={cls}
-                        >
-                          {cta.label}
-                        </a>
-                      );
-                    })}
-                  </div>
-                ) : null}
+                <div className="mt-2 text-[12px] text-black/45">
+                  Use “Learn more” on the card to see details.
+                </div>
               </div>
 
               <div className="rounded-2xl border border-black/10 bg-white p-4">
                 <div className="text-sm font-semibold">Why people switch</div>
-                <div className="mt-2 space-y-2 text-sm text-black/65">
-                  {(card.chips ?? []).slice(0, 5).map((c) => (
-                    <div key={c} className="flex items-start gap-2">
-                      <span className="mt-1.5 h-2 w-2 rounded-full bg-black/70" />
-                      <span>{c}</span>
-                    </div>
-                  ))}
+                <div className="mt-2 text-sm text-black/65 leading-relaxed">
+                  {enticer("split_switch", card)}
                 </div>
-
-                {withLearnMore(card.ctas).length ? (
-                  <div className="mt-4">
-                    {/* Keep first CTA prominent; Learn more remains available in top overlay + caption/split pills */}
-                    {withLearnMore(card.ctas).slice(0, 1).map((cta) => {
-                      const cls =
-                        "block rounded-full bg-black px-4 py-2.5 text-center text-[11px] font-semibold text-white transition hover:bg-black/90 md:px-5 md:py-3 md:text-xs";
-
-                      if (cta.href === "/book") {
-                        return (
-                          <button
-                            key={cta.href + cta.label}
-                            type="button"
-                            onClick={onBook}
-                            className={cls}
-                          >
-                            {cta.label}
-                          </button>
-                        );
-                      }
-
-                      return (
-                        <a
-                          key={cta.href + cta.label}
-                          href={cta.href}
-                          className={cls}
-                        >
-                          {cta.label}
-                        </a>
-                      );
-                    })}
-                  </div>
-                ) : null}
+                <div className="mt-2 text-[12px] text-black/45">
+                  Use “Learn more” on the card to see details.
+                </div>
               </div>
             </div>
           </div>
         )}
+
+        {/* Minimal + Overlay variants have no white bottom sections */}
       </div>
     </motion.article>
   );
@@ -394,6 +310,12 @@ export default function HomePage() {
         title: "Delivery that performs in real traffic.",
         subtitle:
           "Nigeria traffic is real. 6Rides delivery is built around smart routing, disciplined riders, and predictable updates — so customers stay calm and restaurants stay respected.",
+        chips: [
+          "Smart routing",
+          "Disciplined riders",
+          "Predictable updates",
+          "Reliable handover",
+        ],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "split",
         theme: "light",
@@ -428,7 +350,6 @@ export default function HomePage() {
           "Designed for safety-first response",
           "Clear communication from pickup to drop-off",
         ],
-        // IMPORTANT: Request support routes to /emergency-support (not booking)
         ctas: [{ label: "Request support", href: "/emergency-support" }],
         variant: "caption",
         theme: "light",
@@ -492,6 +413,12 @@ export default function HomePage() {
         title: "Premium sedans. Premium rules. Premium earnings.",
         subtitle:
           "If you can maintain a high standard, we help you earn at a higher standard. 6Rides is building a premium sedan partner network city-by-city.",
+        chips: [
+          "Verified onboarding",
+          "Brand protection",
+          "Premium positioning",
+          "Standards enforcement",
+        ],
         ctas: [{ label: "Partner with 6Rides", href: "/partner" }],
         variant: "split",
         theme: "light",
@@ -506,7 +433,12 @@ export default function HomePage() {
         title: "A partner program designed for professionals.",
         subtitle:
           "This is for owners who value professionalism: verified onboarding, disciplined standards, and a premium rider experience that protects your vehicle’s image.",
-        bullets: ["Verified onboarding", "Premium standards", "Professional conduct", "Brand protection"],
+        bullets: [
+          "Verified onboarding",
+          "Premium standards",
+          "Professional conduct",
+          "Brand protection",
+        ],
         ctas: [{ label: "Partner with 6Rides", href: "/partner" }],
         variant: "caption",
         theme: "light",
@@ -527,7 +459,7 @@ export default function HomePage() {
         fit: "cover",
       },
 
-      // SERVICES (BOOK NOW + LEARN MORE)
+      // SERVICES
       {
         key: "hotel_chauffeur",
         src: "/images/6ride/corporate/6ride_chauffeur_hotel_arrival_service.png",
@@ -536,7 +468,12 @@ export default function HomePage() {
         title: "Hotel arrivals with a chauffeur mindset.",
         subtitle:
           "Premium arrivals should feel calm and organized. 6Rides supports disciplined pickups for travelers, executives, and high-standard movement.",
-        bullets: ["Hotel arrivals", "Executive pickups", "Scheduled trips", "Professional conduct"],
+        bullets: [
+          "Hotel arrivals",
+          "Executive pickups",
+          "Scheduled trips",
+          "Professional conduct",
+        ],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "caption",
         theme: "light",
@@ -551,6 +488,12 @@ export default function HomePage() {
         title: "Night rides you can trust.",
         subtitle:
           "Dense traffic and low visibility demand discipline. 6Rides emphasizes safer driving culture, compliance, and quick support escalation when needed.",
+        chips: [
+          "Compliance culture",
+          "Safer driving",
+          "Support escalation",
+          "Professional conduct",
+        ],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "split",
         theme: "light",
@@ -628,6 +571,7 @@ export default function HomePage() {
         title: "Family trips made smoother.",
         subtitle:
           "When comfort matters — outings, weekend trips, lifestyle movement — 6Rides supports cleaner rides and calmer travel moments for families.",
+        chips: ["Calm pickups", "Clean rides", "Family-friendly comfort", "More predictable service"],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "split",
         theme: "light",
@@ -657,7 +601,12 @@ export default function HomePage() {
         title: "Campus movement that feels safer and more organized.",
         subtitle:
           "Students need reliability and safe pickup culture. 6Rides supports more disciplined operations for daily campus movement and local trips.",
-        bullets: ["Clear pickup culture", "More predictable arrival experience", "Safe movement mindset", "Support-first escalation"],
+        bullets: [
+          "Clear pickup culture",
+          "More predictable arrival experience",
+          "Safe movement mindset",
+          "Support-first escalation",
+        ],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "caption",
         theme: "light",
@@ -690,6 +639,12 @@ export default function HomePage() {
       title: "A partner program designed to scale city-by-city.",
       subtitle:
         "6Rides gives premium car owners a structured system: brand standards, premium positioning, onboarding verification, and a utilization-based earning model designed to grow fast.",
+      chips: [
+        "Onboarding verification",
+        "Brand standards",
+        "Premium positioning",
+        "Utilization-based earnings",
+      ],
       ctas: [
         { label: "Partner with 6Rides", href: "/partner" },
         { label: "Investor overview", href: "/investors", variant: "outline" },
@@ -704,7 +659,6 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-black">
-      {/* BOOKING MODAL MOUNTED HERE (so it can open from ANY button) */}
       <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
 
       {/* HERO */}
@@ -716,7 +670,14 @@ export default function HomePage() {
 
         <header className="flex items-center justify-between px-6 py-5 md:px-12">
           <div className="flex items-center gap-2">
-            <Image src="/6logo.PNG" alt="6Rides" width={32} height={32} priority className="h-9 w-9" />
+            <Image
+              src="/6logo.PNG"
+              alt="6Rides"
+              width={32}
+              height={32}
+              priority
+              className="h-9 w-9"
+            />
             <div className="text-xl font-semibold tracking-wide">
               <span className="opacity-90">Rides</span>
             </div>
@@ -743,7 +704,9 @@ export default function HomePage() {
                 transition={{ duration: 0.9, ease: easeOut, delay: 0.15 }}
                 className="mt-4 max-w-xl text-sm text-white/70 md:text-base"
               >
-                Ride-hailing, food delivery, emergency response, corporate movement, and premium partner vehicles — engineered with trust, compliance, and comfort.
+                Ride-hailing, food delivery, emergency response, corporate
+                movement, and premium partner vehicles — engineered with trust,
+                compliance, and comfort.
               </motion.p>
 
               <motion.div
@@ -752,7 +715,6 @@ export default function HomePage() {
                 transition={{ duration: 0.9, ease: easeOut, delay: 0.25 }}
                 className="mt-8 flex flex-wrap gap-4"
               >
-                {/* HERO BOOK BUTTON -> OPENS MODAL (NO NAVIGATION) */}
                 <motion.button
                   type="button"
                   onClick={onBook}
@@ -779,16 +741,30 @@ export default function HomePage() {
                 transition={{ duration: 0.9, ease: easeOut, delay: 0.32 }}
                 className="mt-6 flex flex-wrap items-center gap-2 text-xs text-white/60"
               >
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Verified drivers</span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Emergency support</span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Premium fleet</span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Nigeria-first</span>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                  Verified drivers
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                  Emergency support
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                  Premium fleet
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                  Nigeria-first
+                </span>
               </motion.div>
 
               <div className="mt-6 text-xs text-white/55">
-                Currently operating with focus in <span className="font-semibold text-white/80">Cross River (HQ)</span> and expanding across{" "}
-                <span className="font-semibold text-white/80">Abuja, Lagos, Port Harcourt, and Akwa Ibom</span>. Booking is completed online through{" "}
-                <span className="font-semibold text-white/80">Book Now</span>.
+                Currently operating with focus in{" "}
+                <span className="font-semibold text-white/80">
+                  Cross River (HQ)
+                </span>{" "}
+                and expanding across{" "}
+                <span className="font-semibold text-white/80">
+                  Abuja, Lagos, Port Harcourt, and Akwa Ibom
+                </span>
+                .
               </div>
             </div>
 
@@ -810,9 +786,13 @@ export default function HomePage() {
             className="flex items-end justify-between gap-6"
           >
             <div>
-              <h2 className="text-2xl font-semibold md:text-3xl">See what premium looks like</h2>
+              <h2 className="text-2xl font-semibold md:text-3xl">
+                See what premium looks like
+              </h2>
               <p className="mt-2 max-w-2xl text-sm text-black/65">
-                Every scene below represents a service promise — cleaner vehicles, stronger standards, better safety culture, and a more enjoyable experience from pickup to drop-off.
+                Every scene below represents a service promise — cleaner
+                vehicles, stronger standards, better safety culture, and a more
+                enjoyable experience from pickup to drop-off.
               </p>
             </div>
           </motion.div>
@@ -830,11 +810,19 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-6 py-12 md:px-12">
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-0">
-              <Image src="/6logo.PNG" alt="6Rides" width={28} height={28} className="h-7 w-7" />
+              <Image
+                src="/6logo.PNG"
+                alt="6Rides"
+                width={28}
+                height={28}
+                className="h-7 w-7"
+              />
               <span className="text-sm font-semibold">Rides</span>
             </div>
 
-            <p className="mt-1 text-sm text-black/50">Premium mobility for modern Nigeria.</p>
+            <p className="mt-1 text-sm text-black/50">
+              Premium mobility for modern Nigeria.
+            </p>
           </div>
 
           <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-center text-[12px] font-semibold text-black/70">
@@ -877,12 +865,17 @@ export default function HomePage() {
           </div>
 
           <div className="mt-8 text-center text-xs text-black/50">
-            © {new Date().getFullYear()} 6Rides. A 6Clement Joshua Service. All rights reserved.
+            © {new Date().getFullYear()} 6Rides. A 6Clement Joshua Service. All
+            rights reserved.
           </div>
         </div>
       </footer>
 
-      <WaitlistModal open={waitlistOpen} onClose={() => setWaitlistOpen(false)} source="hero" />
+      <WaitlistModal
+        open={waitlistOpen}
+        onClose={() => setWaitlistOpen(false)}
+        source="hero"
+      />
     </main>
   );
 }
