@@ -695,7 +695,7 @@ export default function HomePage() {
                 Every scene below represents a service promise — cleaner vehicles, stronger standards, better safety culture, and a more enjoyable experience from pickup to drop-off.
               </p>
             </div>
-            <div className="hidden text-xs text-black/50 md:block">21 premium scenes • one consistent standard</div>
+            
           </motion.div>
 
           <div className="mt-8 space-y-10 md:space-y-12">
