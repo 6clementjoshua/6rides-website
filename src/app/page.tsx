@@ -598,7 +598,7 @@ export default function HomePage() {
 
         <header className="flex items-center justify-between px-6 py-5 md:px-12">
           <div className="flex items-center gap-2">
-            <Image src="/6logo.png" alt="6Rides" width={32} height={32} priority className="h-9 w-9" />
+            <Image src="/6logo.PNG" alt="6Rides" width={32} height={32} priority className="h-9 w-9" />
             <div className="text-xl font-semibold tracking-wide">
               <span className="opacity-90">Rides</span>
             </div>
