@@ -84,9 +84,10 @@ function LiquidCard({
   onBook: () => void;
 }) {
   const isDark = card.theme === "dark";
-
-  // Mobile priority: show full image (no crop), desktop remains premium cover.
   const fit: MediaFit = card.fit ?? "cover";
+
+  // ✅ Mobile-only: collapsed/expanded subtitle+chips (desktop unaffected)
+  const [mobileExpanded, setMobileExpanded] = useState(false);
 
   const waterGlass =
     "backdrop-blur-x-2 bg-black/50 border border-white/38 shadow-[0_28px_85px_rgba(50,10,0,0.18)]";
@@ -96,15 +97,22 @@ function LiquidCard({
   const outer =
     "rounded-3xl overflow-hidden border border-black/10 bg-white shadow-[0_12px_30px_rgba(0,0,0,0.07)]";
 
+  // ✅ Remove weird “white/grey/black” outer layer showing around images on mobile:
+  // - keep stage background fully transparent on mobile
+  // - rely on object-cover and centered positioning to fill the card nicely
   const imageStage = cx(
     "relative w-full overflow-hidden",
     "h-[300px] sm:h-[340px] md:h-[520px]",
-    isDark ? "bg-black" : "bg-neutral-100"
+    "bg-transparent md:" + (isDark ? "bg-black" : "bg-neutral-100")
   );
 
+  // ✅ Mobile: always cover (fills card, no white edges)
+  // ✅ Desktop: keep your requested behavior (contain on mobile, cover on md) was causing edges;
+  //            now desktop honors fit, mobile forced to cover.
   const imageClass = cx(
     "h-full w-full object-center transition duration-700 ease-out",
-    fit === "contain" ? "object-contain" : "object-contain md:object-cover",
+    "object-cover", // mobile forced
+    fit === "contain" ? "md:object-contain" : "md:object-cover",
     "md:group-hover:scale-[1.03]"
   );
 
@@ -115,7 +123,6 @@ function LiquidCard({
   const chipCls =
     "rounded-full px-3 py-1 text-[11px] font-semibold border border-white/14 bg-white/10 text-white/85";
 
-  // Overlay CTAs only (these are on the image card).
   const ctaSolid =
     "rounded-full bg-white px-3.5 py-2 text-[11px] font-semibold text-black transition hover:bg-white/90 md:px-5 md:py-2.5 md:text-xs";
   const ctaOutline =
@@ -157,8 +164,10 @@ function LiquidCard({
     );
   };
 
-  // ✅ ONLY overlay gets CTAs. WHITE bottom section never gets CTAs.
   const overlayCtas = withLearnMore(card.ctas);
+
+  // Mobile-only toggler: click subtitle area to expand/collapse
+  const onToggleMobileDetails = () => setMobileExpanded((v) => !v);
 
   return (
     <motion.article
@@ -177,8 +186,9 @@ function LiquidCard({
             priority={card.key === "hero"}
           />
 
+          {/* ✅ Keep overlay subtle; don’t add solid layers that show as borders */}
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-black/04 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/12 via-black/6 to-transparent" />
             <div className="absolute -left-1/4 top-0 h-full w-1/2 rotate-12 bg-white/10 blur-2xl opacity-0 transition duration-700 group-hover:opacity-100" />
           </div>
 
@@ -187,23 +197,74 @@ function LiquidCard({
               className={cx(
                 "max-w-3xl",
                 isDark ? waterGlassDark : waterGlass,
-                "rounded-2xl p-4 md:p-5"
+                "rounded-2xl p-4 md:p-5",
+                // ✅ On mobile, allow tapping the content block (not buttons) to expand text
+                "select-none"
               )}
             >
               {card.eyebrow && <div className={eyebrowCls}>{card.eyebrow}</div>}
               <h3 className={titleCls}>{card.title}</h3>
-              <p className={subtitleCls}>{card.subtitle}</p>
 
-              {card.chips?.length ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {card.chips.map((c) => (
-                    <span key={c} className={chipCls}>
-                      {c}
-                    </span>
-                  ))}
+              {/* ✅ MOBILE: collapsed subtitle/chips by default (title + buttons visible) */}
+              <div className="md:hidden">
+                <button
+                  type="button"
+                  onClick={onToggleMobileDetails}
+                  className="mt-2 w-full text-left"
+                  aria-expanded={mobileExpanded}
+                  aria-controls={`mobile-details-${card.key}`}
+                >
+                  {/* when collapsed, show a tiny hint line instead of full subtitle */}
+                  {!mobileExpanded ? (
+                    <div className="text-[12px] text-white/70">
+                      Tap to read more
+                      <span className="ml-2 text-white/55">▾</span>
+                    </div>
+                  ) : (
+                    <div className="text-[12px] text-white/70">
+                      Tap to collapse
+                      <span className="ml-2 text-white/55">▴</span>
+                    </div>
+                  )}
+                </button>
+
+                <div
+                  id={`mobile-details-${card.key}`}
+                  className={cx(
+                    "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                    mobileExpanded ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0"
+                  )}
+                >
+                  <p className={subtitleCls}>{card.subtitle}</p>
+
+                  {card.chips?.length ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {card.chips.map((c) => (
+                        <span key={c} className={chipCls}>
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
+              </div>
 
+              {/* ✅ DESKTOP: unchanged (always show subtitle + chips) */}
+              <div className="hidden md:block">
+                <p className={subtitleCls}>{card.subtitle}</p>
+
+                {card.chips?.length ? (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {card.chips.map((c) => (
+                      <span key={c} className={chipCls}>
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Buttons always visible (mobile + desktop) */}
               {overlayCtas.length ? (
                 <div className="mt-4 flex flex-wrap gap-2.5 md:gap-3">
                   {overlayCtas.map(renderOverlayCTA)}
@@ -270,11 +331,11 @@ export default function HomePage() {
       {
         key: "hero",
         src: "/images/6ride/lifestyle/6ride_shopping_trunk_loading.png",
-        alt: "6Rides premium lifestyle pickup after shopping",
+        alt: "6ride premium lifestyle pickup after shopping",
         eyebrow: "Lifestyle • Premium pickup",
         title: "Designed for real life, not just rides.",
         subtitle:
-          "From quick errands to lifestyle movement, 6Rides is built around cleanliness, comfort, and predictable service — so every trip feels premium, not stressful.",
+          "From quick errands to lifestyle movement, 6ride is built around cleanliness, comfort, and predictable service — so every trip feels premium, not stressful.",
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "overlay",
         theme: "dark",
@@ -285,7 +346,7 @@ export default function HomePage() {
       {
         key: "food_brand",
         src: "/images/6ride/food/6ride_food_delivery_brand_showcase.png",
-        alt: "6Rides food delivery branded rider",
+        alt: "6ride food delivery branded rider",
         eyebrow: "Food delivery • Branded operations",
         title: "Food delivery with brand standards.",
         subtitle:
@@ -305,11 +366,11 @@ export default function HomePage() {
       {
         key: "food_traffic",
         src: "/images/6ride/food/6ride_food_delivery_heavy_traffic.png",
-        alt: "6Rides food delivery in heavy traffic",
+        alt: "6ride food delivery in heavy traffic",
         eyebrow: "Food delivery • City performance",
         title: "Delivery that performs in real traffic.",
         subtitle:
-          "Nigeria traffic is real. 6Rides delivery is built around smart routing, disciplined riders, and predictable updates — so customers stay calm and restaurants stay respected.",
+          "Nigeria traffic is real. 6ride delivery is built around smart routing, disciplined riders, and predictable updates — so customers stay calm and restaurants stay respected.",
         chips: [
           "Smart routing",
           "Disciplined riders",
@@ -325,7 +386,7 @@ export default function HomePage() {
       {
         key: "food_handover",
         src: "/images/6ride/food/6ride_food_delivery_customer_handover.png",
-        alt: "6Rides rider handing over a food delivery",
+        alt: "6ride rider handing over a food delivery",
         eyebrow: "Food delivery • Customer handover",
         title: "A handover you can trust.",
         subtitle:
@@ -339,7 +400,7 @@ export default function HomePage() {
       {
         key: "emergency",
         src: "/images/6ride/emergency/6ride_emergency_medical_street_response.png",
-        alt: "6Rides emergency response vehicle assisting on the street",
+        alt: "6ride emergency response vehicle assisting on the street",
         eyebrow: "Emergency • Rapid response support",
         title: "Emergency response support when minutes matter.",
         subtitle:
@@ -360,12 +421,12 @@ export default function HomePage() {
       {
         key: "partner_male_phone",
         src: "/images/6ride/partner/6ride_partner_vehicle_premium_male_phone.png",
-        alt: "6Rides partner premium vehicle with male rider on phone",
+        alt: "6ride partner premium vehicle with male rider on phone",
         eyebrow: "Partner vehicles • Earn with standards",
-        title: "Partner with 6Rides and earn with premium positioning.",
+        title: "Partner with 6ride and earn with premium positioning.",
         subtitle:
           "Own a premium vehicle? Join a structured partner program built around brand standards, verified onboarding, and a quality-first rider experience.",
-        ctas: [{ label: "Partner with 6Rides", href: "/partner" }],
+        ctas: [{ label: "Partner with 6ride", href: "/partner" }],
         variant: "overlay",
         theme: "dark",
         fit: "cover",
@@ -374,7 +435,7 @@ export default function HomePage() {
       {
         key: "partner_female_cadillac",
         src: "/images/6ride/partner/6ride_partner_vehicle_premium_female_cadillac.png",
-        alt: "6Rides partner vehicle premium female near Cadillac SUV",
+        alt: "6ride partner vehicle premium female near Cadillac SUV",
         eyebrow: "Partner vehicles • Premium owners",
         title: "Turn your premium car into a premium income stream.",
         subtitle:
@@ -385,7 +446,7 @@ export default function HomePage() {
           "Verified partner identity",
           "Structured earning model",
         ],
-        ctas: [{ label: "Partner with 6Rides", href: "/partner" }],
+        ctas: [{ label: "Partner with 6ride", href: "/partner" }],
         variant: "caption",
         theme: "light",
         fit: "cover",
@@ -394,12 +455,12 @@ export default function HomePage() {
       {
         key: "partner_range_rover",
         src: "/images/6ride/partner/6ride_partner_vehicle_range_rover_female.png",
-        alt: "6Rides partner Range Rover with female rider",
+        alt: "6ride partner Range Rover with female rider",
         eyebrow: "Partner vehicles • SUV class",
         title: "SUV owners: partner with a premium-first brand.",
         subtitle:
-          "Executive SUVs are in demand for business and lifestyle movement. Join the 6Rides partner program and list your SUV under enforced standards and premium positioning.",
-        ctas: [{ label: "Partner with 6Rides", href: "/partner" }],
+          "Executive SUVs are in demand for business and lifestyle movement. Join the 6ride partner program and list your SUV under enforced standards and premium positioning.",
+        ctas: [{ label: "Partner with 6ride", href: "/partner" }],
         variant: "minimal",
         theme: "dark",
         fit: "cover",
@@ -408,18 +469,18 @@ export default function HomePage() {
       {
         key: "partner_audi_male",
         src: "/images/6ride/partner/6ride_partner_vehicle_audi_male.png",
-        alt: "6Rides partner Audi premium with male rider",
+        alt: "6ride partner Audi premium with male rider",
         eyebrow: "Partner vehicles • Premium sedans",
         title: "Premium sedans. Premium rules. Premium earnings.",
         subtitle:
-          "If you can maintain a high standard, we help you earn at a higher standard. 6Rides is building a premium sedan partner network city-by-city.",
+          "If you can maintain a high standard, we help you earn at a higher standard. 6ride is building a premium sedan partner network city-by-city.",
         chips: [
           "Verified onboarding",
           "Brand protection",
           "Premium positioning",
           "Standards enforcement",
         ],
-        ctas: [{ label: "Partner with 6Rides", href: "/partner" }],
+        ctas: [{ label: "Partner with 6ride", href: "/partner" }],
         variant: "split",
         theme: "light",
         fit: "cover",
@@ -428,7 +489,7 @@ export default function HomePage() {
       {
         key: "partner_bmw_female_tablet",
         src: "/images/6ride/partner/6ride_partner_vehicle_bmw_female_tablet.png",
-        alt: "6Rides partner BMW with female using tablet",
+        alt: "6ride partner BMW with female using tablet",
         eyebrow: "Partner vehicles • Business-ready",
         title: "A partner program designed for professionals.",
         subtitle:
@@ -439,7 +500,7 @@ export default function HomePage() {
           "Professional conduct",
           "Brand protection",
         ],
-        ctas: [{ label: "Partner with 6Rides", href: "/partner" }],
+        ctas: [{ label: "Partner with 6ride", href: "/partner" }],
         variant: "caption",
         theme: "light",
         fit: "cover",
@@ -448,12 +509,12 @@ export default function HomePage() {
       {
         key: "partner_mercedes_male",
         src: "/images/6ride/partner/6ride_partner_vehicle_mercedes_male.png",
-        alt: "6Rides partner Mercedes with male rider",
+        alt: "6ride partner Mercedes with male rider",
         eyebrow: "Partner vehicles • Premium badge",
         title: "Mercedes owners: list with standards, not noise.",
         subtitle:
           "We’re building a premium-only image. If your car is premium and your conduct is professional, the partner program is built for you.",
-        ctas: [{ label: "Partner with 6Rides", href: "/partner" }],
+        ctas: [{ label: "Partner with 6ride", href: "/partner" }],
         variant: "minimal",
         theme: "dark",
         fit: "cover",
@@ -463,17 +524,12 @@ export default function HomePage() {
       {
         key: "hotel_chauffeur",
         src: "/images/6ride/corporate/6ride_chauffeur_hotel_arrival_service.png",
-        alt: "6Rides chauffeur service at hotel arrival",
+        alt: "6ride chauffeur service at hotel arrival",
         eyebrow: "Chauffeur • Hotel arrivals",
         title: "Hotel arrivals with a chauffeur mindset.",
         subtitle:
-          "Premium arrivals should feel calm and organized. 6Rides supports disciplined pickups for travelers, executives, and high-standard movement.",
-        bullets: [
-          "Hotel arrivals",
-          "Executive pickups",
-          "Scheduled trips",
-          "Professional conduct",
-        ],
+          "Premium arrivals should feel calm and organized. 6ride supports disciplined pickups for travelers, executives, and high-standard movement.",
+        bullets: ["Hotel arrivals", "Executive pickups", "Scheduled trips", "Professional conduct"],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "caption",
         theme: "light",
@@ -483,17 +539,12 @@ export default function HomePage() {
       {
         key: "night_traffic",
         src: "/images/6ride/infrastructure/6ride_night_city_traffic_mercedes.png",
-        alt: "6Rides vehicle in night city traffic",
+        alt: "6ride vehicle in night city traffic",
         eyebrow: "Urban mobility • Night rides",
         title: "Night rides you can trust.",
         subtitle:
-          "Dense traffic and low visibility demand discipline. 6Rides emphasizes safer driving culture, compliance, and quick support escalation when needed.",
-        chips: [
-          "Compliance culture",
-          "Safer driving",
-          "Support escalation",
-          "Professional conduct",
-        ],
+          "Dense traffic and low visibility demand discipline. 6ride emphasizes safer driving culture, compliance, and quick support escalation when needed.",
+        chips: ["Compliance culture", "Safer driving", "Support escalation", "Professional conduct"],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "split",
         theme: "light",
@@ -503,11 +554,11 @@ export default function HomePage() {
       {
         key: "corporate_pickup",
         src: "/images/6ride/corporate/6ride_corporate_client_pickup.png",
-        alt: "6Rides corporate client pickup at office",
+        alt: "6ride corporate client pickup at office",
         eyebrow: "Corporate • Client movement",
         title: "Corporate pickups that look professional.",
         subtitle:
-          "For meetings and client movement, presentation matters. 6Rides is built to deliver a cleaner, more premium, and more dependable experience than basic ride-hailing.",
+          "For meetings and client movement, presentation matters. 6ride is built to deliver a cleaner, more premium, and more dependable experience than basic ride-hailing.",
         bullets: ["Client pickups", "Office mobility", "Professional look", "Dependable"],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "caption",
@@ -518,11 +569,11 @@ export default function HomePage() {
       {
         key: "airport_fleet",
         src: "/images/6ride/infrastructure/6ride_airport_fleet_lineup.png",
-        alt: "6Rides fleet lineup at airport",
+        alt: "6ride fleet lineup at airport",
         eyebrow: "Operations • Fleet readiness",
         title: "Fleet readiness for scheduled operations.",
         subtitle:
-          "Airport transfers and scheduled trips depend on reliability. 6Rides is structured to run disciplined operations with predictable service and support.",
+          "Airport transfers and scheduled trips depend on reliability. 6ride is structured to run disciplined operations with predictable service and support.",
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "overlay",
         theme: "dark",
@@ -532,11 +583,11 @@ export default function HomePage() {
       {
         key: "police_compliance",
         src: "/images/6ride/infrastructure/6ride_police_traffic_compliance.png",
-        alt: "6Rides traffic compliance scene",
+        alt: "6ride traffic compliance scene",
         eyebrow: "Safety • Traffic compliance",
         title: "Traffic & compliance — built into the brand.",
         subtitle:
-          "A serious ride brand respects the road. 6Rides emphasizes compliance, safer driving culture, and professional conduct — especially in busy city movement.",
+          "A serious ride brand respects the road. 6ride emphasizes compliance, safer driving culture, and professional conduct — especially in busy city movement.",
         bullets: [
           "Compliance-focused service culture",
           "Professional conduct expectations",
@@ -552,11 +603,11 @@ export default function HomePage() {
       {
         key: "restaurant_elixir",
         src: "/images/6ride/infrastructure/6ride_restaurant_pickup_elixir.png",
-        alt: "6Rides vehicle at Elixir of Restaurant pickup",
+        alt: "6ride vehicle at Elixir of Restaurant pickup",
         eyebrow: "Brand moments • Pickup points",
         title: "Clean pickups at premium venues.",
         subtitle:
-          "From restaurants to lounges and events — pickup experience matters. 6Rides is designed to feel premium where people actually live and socialize.",
+          "From restaurants to lounges and events — pickup experience matters. 6ride is designed to feel premium where people actually live and socialize.",
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "overlay",
         theme: "dark",
@@ -566,11 +617,11 @@ export default function HomePage() {
       {
         key: "family_beach",
         src: "/images/6ride/lifestyle/6ride_family_beach_lifestyle.png",
-        alt: "6Rides family beach lifestyle transport",
+        alt: "6ride family beach lifestyle transport",
         eyebrow: "Lifestyle • Family movement",
         title: "Family trips made smoother.",
         subtitle:
-          "When comfort matters — outings, weekend trips, lifestyle movement — 6Rides supports cleaner rides and calmer travel moments for families.",
+          "When comfort matters — outings, weekend trips, lifestyle movement — 6ride supports cleaner rides and calmer travel moments for families.",
         chips: ["Calm pickups", "Clean rides", "Family-friendly comfort", "More predictable service"],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "split",
@@ -581,11 +632,11 @@ export default function HomePage() {
       {
         key: "business_exchange",
         src: "/images/6ride/corporate/6ride_business_document_exchange.png",
-        alt: "6Rides business document exchange beside vehicle",
+        alt: "6ride business document exchange beside vehicle",
         eyebrow: "Business • Secure handovers",
         title: "Business movement with confidence.",
         subtitle:
-          "For professionals, time and trust matter. 6Rides supports dependable movement for business activity — when you want a calmer, cleaner, more credible ride.",
+          "For professionals, time and trust matter. 6ride supports dependable movement for business activity — when you want a calmer, cleaner, more credible ride.",
         bullets: ["Professional trust", "Business-ready", "Clean arrival", "Reliable pickup"],
         ctas: [{ label: "Book now", href: "/book" }],
         variant: "caption",
@@ -596,11 +647,11 @@ export default function HomePage() {
       {
         key: "campus",
         src: "/images/6ride/lifestyle/6ride_campus_student_transport.png",
-        alt: "6Rides campus student transport scene",
+        alt: "6ride campus student transport scene",
         eyebrow: "Campus • Student movement",
         title: "Campus movement that feels safer and more organized.",
         subtitle:
-          "Students need reliability and safe pickup culture. 6Rides supports more disciplined operations for daily campus movement and local trips.",
+          "Students need reliability and safe pickup culture. 6ride supports more disciplined operations for daily campus movement and local trips.",
         bullets: [
           "Clear pickup culture",
           "More predictable arrival experience",
@@ -616,7 +667,7 @@ export default function HomePage() {
       {
         key: "urus",
         src: "/images/6ride/lifestyle/6ride_highway_performance_urus.png",
-        alt: "6Rides performance vehicle on highway",
+        alt: "6ride performance vehicle on highway",
         eyebrow: "Premium fleet • Highway performance",
         title: "Premium performance for longer movement.",
         subtitle:
@@ -634,11 +685,11 @@ export default function HomePage() {
     const extra: StoryCard = {
       key: "partner_scale_program",
       src: "/images/6ride/partner/6ride_partner_vehicle_premium_female_cadillac.png",
-      alt: "6Rides partner program premium vehicle standardization",
+      alt: "6ride partner program premium vehicle standardization",
       eyebrow: "Partners • Scale program",
       title: "A partner program designed to scale city-by-city.",
       subtitle:
-        "6Rides gives premium car owners a structured system: brand standards, premium positioning, onboarding verification, and a utilization-based earning model designed to grow fast.",
+        "6ride gives premium car owners a structured system: brand standards, premium positioning, onboarding verification, and a utilization-based earning model designed to grow fast.",
       chips: [
         "Onboarding verification",
         "Brand standards",
@@ -646,7 +697,7 @@ export default function HomePage() {
         "Utilization-based earnings",
       ],
       ctas: [
-        { label: "Partner with 6Rides", href: "/partner" },
+        { label: "Partner with 6ride", href: "/partner" },
         { label: "Investor overview", href: "/investors", variant: "outline" },
       ],
       variant: "split",
@@ -672,14 +723,14 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <Image
               src="/6logo.PNG"
-              alt="6Rides"
+              alt="6ride"
               width={32}
               height={32}
               priority
               className="h-9 w-9"
             />
             <div className="text-xl font-semibold tracking-wide">
-              <span className="opacity-90">Rides</span>
+              <span className="opacity-90">ride</span>
             </div>
           </div>
         </header>
@@ -731,7 +782,7 @@ export default function HomePage() {
                   whileTap={{ scale: 0.98 }}
                   className="rounded-full border border-white/20 px-6 py-3 text-sm transition hover:border-white/40"
                 >
-                  Download 6Rides
+                  Download 6ride
                 </motion.button>
               </motion.div>
 
@@ -812,12 +863,12 @@ export default function HomePage() {
             <div className="flex items-center gap-0">
               <Image
                 src="/6logo.PNG"
-                alt="6Rides"
+                alt="6ride"
                 width={28}
                 height={28}
                 className="h-7 w-7"
               />
-              <span className="text-sm font-semibold">Rides</span>
+              <span className="text-sm font-semibold">ride</span>
             </div>
 
             <p className="mt-1 text-sm text-black/50">
@@ -826,46 +877,106 @@ export default function HomePage() {
           </div>
 
           <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-center text-[12px] font-semibold text-black/70">
-            <Link href="/policies/terms" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Terms of Service
             </Link>
-            <Link href="/policies/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Privacy Policy
             </Link>
-            <Link href="/policies/acceptable-use" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/acceptable-use"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Acceptable Use
             </Link>
-            <Link href="/policies/safety" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/safety"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Safety Guidelines
             </Link>
-            <Link href="/policies/refunds" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/refunds"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Refund & Cancellation
             </Link>
-            <Link href="/policies/subscription-billing" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/subscription-billing"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Subscription & Billing
             </Link>
-            <Link href="/policies/partner-terms" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/partner-terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Partner Terms
             </Link>
-            <Link href="/policies/emergency" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/emergency"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Emergency Disclaimer
             </Link>
-            <Link href="/policies/contact" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/contact"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Contact
             </Link>
-            <Link href="/policies/child-student-safety" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/child-student-safety"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Child & Student Safety
             </Link>
-            <Link href="/policies/insurance-liability" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/insurance-liability"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Insurance & Liability
             </Link>
-            <Link href="/policies/corporate-sla" target="_blank" rel="noopener noreferrer" className="hover:text-black">
+            <Link
+              href="/policies/corporate-sla"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
               Corporate SLA
             </Link>
           </div>
 
           <div className="mt-8 text-center text-xs text-black/50">
-            © {new Date().getFullYear()} 6Rides. A 6Clement Joshua Service. All
+            © {new Date().getFullYear()} 6ride. A 6Clement Joshua Service. All
             rights reserved.
           </div>
         </div>
