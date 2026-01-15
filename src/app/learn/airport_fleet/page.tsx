@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -88,6 +89,9 @@ function Bullets({ items }: { items: string[] }) {
 }
 
 export default function LearnAirportFleetPage() {
+    // ✅ Mobile-only collapse for hero text
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Header */}
@@ -113,43 +117,102 @@ export default function LearnAirportFleetPage() {
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
-                    className="overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
+                    className={cx(
+                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        // ✅ Mobile transparent background avoids any “outer color” showing
+                        "bg-transparent md:bg-black"
+                    )}
                 >
                     <div className="relative h-[360px] sm:h-[440px] md:h-[540px]">
                         <Image
                             src="/images/6ride/infrastructure/6ride_airport_fleet_lineup.png"
                             alt="6ride fleet lineup at airport"
                             fill
-                            className="object-contain md:object-cover"
+                            // ✅ KEY FIX: mobile cover (no edges), desktop unchanged
+                            className="object-cover md:object-cover"
                             priority
                         />
+
                         <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/22 to-transparent" />
 
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                            <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
+                            <div className={cx(HERO_GLASS, "backdrop-blur-md select-none")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Operations • Fleet readiness
                                 </div>
+
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
                                     Fleet readiness for scheduled operations.
                                 </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    Airport transfers and scheduled trips depend on reliability. 6ride is structured to
-                                    run disciplined operations with predictable service, clean presentation, and support
-                                    escalation — so pickups feel organized, not chaotic.
-                                </p>
 
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Scheduled pickups", "Airport transfers", "Reliable timing", "Support escalation"].map(
-                                        (c) => (
-                                            <span
-                                                key={c}
-                                                className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
-                                            >
-                                                {c}
-                                            </span>
-                                        )
-                                    )}
+                                {/* ✅ MOBILE: tap to expand/collapse subtitle + chips */}
+                                <div className="md:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileExpanded((v) => !v)}
+                                        className="mt-2 w-full text-left"
+                                        aria-expanded={mobileExpanded}
+                                        aria-controls="hero-mobile-details"
+                                    >
+                                        {!mobileExpanded ? (
+                                            <div className="text-[12px] text-white/80">
+                                                Tap to read more <span className="ml-2 text-white/60">▾</span>
+                                            </div>
+                                        ) : (
+                                            <div className="text-[12px] text-white/80">
+                                                Tap to collapse <span className="ml-2 text-white/60">▴</span>
+                                            </div>
+                                        )}
+                                    </button>
+
+                                    <div
+                                        id="hero-mobile-details"
+                                        className={cx(
+                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                                            mobileExpanded ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0"
+                                        )}
+                                    >
+                                        <p className="mt-2 text-sm text-white/90 leading-relaxed">
+                                            Airport transfers and scheduled trips depend on reliability. 6ride is structured to
+                                            run disciplined operations with predictable service, clean presentation, and support
+                                            escalation — so pickups feel organized, not chaotic.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {["Scheduled pickups", "Airport transfers", "Reliable timing", "Support escalation"].map(
+                                                (c) => (
+                                                    <span
+                                                        key={c}
+                                                        className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                    >
+                                                        {c}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ DESKTOP: unchanged (always visible) */}
+                                <div className="hidden md:block">
+                                    <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
+                                        Airport transfers and scheduled trips depend on reliability. 6ride is structured to
+                                        run disciplined operations with predictable service, clean presentation, and support
+                                        escalation — so pickups feel organized, not chaotic.
+                                    </p>
+
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {["Scheduled pickups", "Airport transfers", "Reliable timing", "Support escalation"].map(
+                                            (c) => (
+                                                <span
+                                                    key={c}
+                                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                >
+                                                    {c}
+                                                </span>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -159,7 +222,7 @@ export default function LearnAirportFleetPage() {
                 {/* BODY */}
                 <div className="mt-10 grid gap-8 md:grid-cols-12">
                     {/* MAIN */}
-                    <div className="md:col-span-8 space-y-8">
+                    <div className="space-y-8 md:col-span-8">
                         {/* Explanation */}
                         <Panel>
                             <Section
@@ -202,7 +265,7 @@ export default function LearnAirportFleetPage() {
                                 <div className="text-sm font-semibold text-neutral-950">
                                     The real goal
                                 </div>
-                                <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
+                                <p className="mt-2 text-sm leading-relaxed text-neutral-800">
                                     Make airport movement feel organized: calmer pickup, cleaner arrival, predictable
                                     coordination, and a professional finish — because travelers remember the first and last mile.
                                 </p>
@@ -250,13 +313,22 @@ export default function LearnAirportFleetPage() {
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-3">
                                 {[
-                                    { title: "Best for", body: "Travelers, executives, business arrivals, airport schedules, hospitality." },
-                                    { title: "Feels like", body: "Organized pickup + clean presentation + predictable coordination." },
-                                    { title: "Positioning", body: "Premium timing discipline for modern Nigeria movement." },
+                                    {
+                                        title: "Best for",
+                                        body: "Travelers, executives, business arrivals, airport schedules, hospitality.",
+                                    },
+                                    {
+                                        title: "Feels like",
+                                        body: "Organized pickup + clean presentation + predictable coordination.",
+                                    },
+                                    {
+                                        title: "Positioning",
+                                        body: "Premium timing discipline for modern Nigeria movement.",
+                                    },
                                 ].map((x) => (
                                     <Tile key={x.title}>
                                         <div className="text-sm font-semibold text-neutral-950">{x.title}</div>
-                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{x.body}</div>
+                                        <div className="mt-2 text-sm leading-relaxed text-neutral-800">{x.body}</div>
                                     </Tile>
                                 ))}
                             </div>
@@ -295,7 +367,7 @@ export default function LearnAirportFleetPage() {
                                     <Tile key={s.step}>
                                         <div className="text-xs font-semibold text-neutral-800">Step {s.step}</div>
                                         <div className="mt-1 text-sm font-semibold text-neutral-950">{s.title}</div>
-                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{s.body}</div>
+                                        <div className="mt-2 text-sm leading-relaxed text-neutral-800">{s.body}</div>
                                     </Tile>
                                 ))}
                             </div>
@@ -340,7 +412,7 @@ export default function LearnAirportFleetPage() {
                                             Privacy Policy
                                         </Link>
                                     </div>
-                                    <div className="mt-3 text-[12px] text-neutral-800 leading-relaxed">
+                                    <div className="mt-3 text-[12px] leading-relaxed text-neutral-800">
                                         These documents define expectations, enforcement, and account actions.
                                     </div>
                                 </Tile>
@@ -371,7 +443,7 @@ export default function LearnAirportFleetPage() {
                                 ].map((x) => (
                                     <Tile key={x.q}>
                                         <div className="text-sm font-semibold text-neutral-950">{x.q}</div>
-                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{x.a}</div>
+                                        <div className="mt-2 text-sm leading-relaxed text-neutral-800">{x.a}</div>
                                     </Tile>
                                 ))}
                             </div>
@@ -413,8 +485,6 @@ export default function LearnAirportFleetPage() {
                                     ))}
                                 </div>
                             </Panel>
-
-                           
                         </div>
                     </aside>
                 </div>
