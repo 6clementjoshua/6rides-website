@@ -1,4 +1,4 @@
-// src/app/learn/airport_fleet/page.tsx
+// src/app/learn/restaurant_elixir/page.tsx
 "use client";
 
 import Image from "next/image";
@@ -87,7 +87,7 @@ function Bullets({ items }: { items: string[] }) {
     );
 }
 
-export default function LearnAirportFleetPage() {
+export default function LearnRestaurantElixirPage() {
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Header */}
@@ -117,8 +117,8 @@ export default function LearnAirportFleetPage() {
                 >
                     <div className="relative h-[360px] sm:h-[440px] md:h-[540px]">
                         <Image
-                            src="/images/6ride/infrastructure/6ride_airport_fleet_lineup.png"
-                            alt="6ride fleet lineup at airport"
+                            src="/images/6ride/infrastructure/6ride_restaurant_pickup_elixir.png"
+                            alt="6ride vehicle at restaurant pickup"
                             fill
                             className="object-contain md:object-cover"
                             priority
@@ -128,19 +128,19 @@ export default function LearnAirportFleetPage() {
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
                             <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
-                                    Operations • Fleet readiness
+                                    Brand moments • Pickup points
                                 </div>
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
-                                    Fleet readiness for scheduled operations.
+                                    Clean pickups at premium venues.
                                 </h1>
                                 <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    Airport transfers and scheduled trips depend on reliability. 6ride is structured to
-                                    run disciplined operations with predictable service, clean presentation, and support
-                                    escalation — so pickups feel organized, not chaotic.
+                                    From restaurants to lounges and events — pickup experience matters. 6ride is designed
+                                    to feel premium where people actually live and socialize: clean arrival, calm coordination,
+                                    and professional behavior that protects the moment.
                                 </p>
 
                                 <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Scheduled pickups", "Airport transfers", "Reliable timing", "Support escalation"].map(
+                                    {["Clean arrival", "Calm pickup culture", "Professional conduct", "Premium venues"].map(
                                         (c) => (
                                             <span
                                                 key={c}
@@ -164,35 +164,35 @@ export default function LearnAirportFleetPage() {
                         <Panel>
                             <Section
                                 eyebrow="Full explanation"
-                                title="Airports punish disorganization"
-                                desc="Airport movement is timing-sensitive: flights, security, traffic, queues, and luggage. This page explains how 6ride approaches airport operations — readiness, clean presentation, and predictable coordination."
+                                title="Premium venues need premium pickups"
+                                desc="A great night can be ruined by a messy pickup. This page explains the ‘brand moment’ idea: arrive clean, coordinate calmly, and exit smoothly — without chaos, shouting, or disrespect."
                             />
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">
-                                        What goes wrong with airport pickups
+                                        What ruins the moment
                                     </div>
                                     <Bullets
                                         items={[
-                                            "Late arrivals without clear coordination",
-                                            "Poor communication about where to meet",
-                                            "Messy vehicles for travelers with luggage",
-                                            "No escalation path when schedules shift",
+                                            "Dirty vehicles or unpleasant cabin smell",
+                                            "Chaotic calls and shouting at pickup points",
+                                            "Unsafe stop locations and reckless U-turns",
+                                            "Disrespectful talk or harassment",
                                         ]}
                                     />
                                 </Tile>
 
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">
-                                        The 6ride airport standard
+                                        The 6ride venue pickup standard
                                     </div>
                                     <Bullets
                                         items={[
-                                            "Predictable behavior and coordination mindset",
-                                            "Cleaner presentation for first impressions",
-                                            "Luggage-friendly movement culture",
-                                            "Support escalation when plans change",
+                                            "Clean presentation and calm approach",
+                                            "Clear pickup behavior and safer stop choices",
+                                            "Professional conduct and discretion",
+                                            "Support escalation if anything feels off",
                                         ]}
                                     />
                                 </Tile>
@@ -200,11 +200,11 @@ export default function LearnAirportFleetPage() {
 
                             <div className="mt-6 rounded-2xl border border-black/10 bg-neutral-50 p-5">
                                 <div className="text-sm font-semibold text-neutral-950">
-                                    The real goal
+                                    Why this matters
                                 </div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    Make airport movement feel organized: calmer pickup, cleaner arrival, predictable
-                                    coordination, and a professional finish — because travelers remember the first and last mile.
+                                    Restaurants, lounges, and events are social environments. People care about image,
+                                    comfort, and safety. Premium pickup culture protects that — for riders, venues, and the brand.
                                 </p>
                             </div>
                         </Panel>
@@ -213,21 +213,22 @@ export default function LearnAirportFleetPage() {
                         <Panel>
                             <Section
                                 eyebrow="Package contents"
-                                title="What you get in airport fleet readiness"
-                                desc="Airport flow is built around timing discipline and service consistency."
+                                title="What you get in premium venue pickup"
+                                desc="A cleaner, calmer end-to-end experience around high-visibility pickup points."
                             />
+
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">
-                                        Service standards
+                                        Experience standards
                                     </div>
                                     <Bullets
                                         items={[
-                                            "Clean vehicle presentation and premium-first mindset",
-                                            "Predictable coordination and calmer pickup culture",
-                                            "Support escalation when flight timing changes",
-                                            "Compliance-first driving behavior in dense zones",
-                                            "Account action possible for repeated violations",
+                                            "Cleaner vehicle presentation and premium-first mindset",
+                                            "Calm pickup culture with clearer expectations",
+                                            "Respectful communication and discretion",
+                                            "Safer stop decisions in busy venue areas",
+                                            "Support escalation when something feels off",
                                         ]}
                                     />
                                 </Tile>
@@ -238,11 +239,11 @@ export default function LearnAirportFleetPage() {
                                     </div>
                                     <Bullets
                                         items={[
-                                            "Airport pickup and drop-off",
-                                            "Hotel-to-airport and airport-to-office movement",
-                                            "Business travel and executive arrivals",
-                                            "Luggage-friendly movement",
-                                            "Scheduled trips where timing matters",
+                                            "Restaurant pickups and dinner nights",
+                                            "Lounges, clubs, and nightlife exits",
+                                            "Event arrivals and post-event movement",
+                                            "Hotel-to-venue and venue-to-hotel trips",
+                                            "High-visibility social movement",
                                         ]}
                                     />
                                 </Tile>
@@ -250,9 +251,9 @@ export default function LearnAirportFleetPage() {
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-3">
                                 {[
-                                    { title: "Best for", body: "Travelers, executives, business arrivals, airport schedules, hospitality." },
-                                    { title: "Feels like", body: "Organized pickup + clean presentation + predictable coordination." },
-                                    { title: "Positioning", body: "Premium timing discipline for modern Nigeria movement." },
+                                    { title: "Best for", body: "Restaurants, lounges, events, date nights, premium social movement." },
+                                    { title: "Feels like", body: "Clean arrival + calm pickup + smooth exit." },
+                                    { title: "Positioning", body: "Premium lifestyle mobility built on conduct and standards." },
                                 ].map((x) => (
                                     <Tile key={x.title}>
                                         <div className="text-sm font-semibold text-neutral-950">{x.title}</div>
@@ -266,30 +267,30 @@ export default function LearnAirportFleetPage() {
                         <Panel>
                             <Section
                                 eyebrow="Flow"
-                                title="How airport pickup flow works"
-                                desc="Simple steps that reduce confusion and missed connections."
+                                title="How venue pickup works"
+                                desc="This flow reduces confusion and keeps the moment premium."
                             />
                             <div className="grid gap-3">
                                 {[
                                     {
                                         step: "01",
-                                        title: "Set airport pickup/drop clearly",
-                                        body: "Use the correct terminal/zone and add any notes (entrance, airline, gate/landmark).",
+                                        title: "Set the correct pickup point",
+                                        body: "Use the right entrance, gate, or landmark. Venue zones are busy — clarity prevents chaos.",
                                     },
                                     {
                                         step: "02",
-                                        title: "Coordinate calmly",
-                                        body: "Airport zones can be busy. Clear communication and calmer pickup behavior reduce chaos.",
+                                        title: "Arrival with calm standards",
+                                        body: "Clean arrival, professional posture, and safer stopping decisions around crowds.",
                                     },
                                     {
                                         step: "03",
-                                        title: "Move with compliance-first discipline",
-                                        body: "Dense traffic and enforcement zones require careful, lawful, professional movement.",
+                                        title: "Movement with discretion",
+                                        body: "Respectful behavior and quiet professionalism. No drama, no harassment, no intimidation.",
                                     },
                                     {
                                         step: "04",
-                                        title: "Finish like a premium service",
-                                        body: "Clean arrival, respectful handover, luggage-friendly support where possible.",
+                                        title: "Smooth exit and finish",
+                                        body: "The goal is a calm exit, a safer ride, and a premium finish the rider remembers.",
                                     },
                                 ].map((s) => (
                                     <Tile key={s.step}>
@@ -305,8 +306,8 @@ export default function LearnAirportFleetPage() {
                         <Panel>
                             <Section
                                 eyebrow="Trust layer"
-                                title="Operational standards and policy alignment"
-                                desc="Airports require strict conduct. Policies define what’s allowed and what happens when standards are violated."
+                                title="Conduct rules and policy alignment"
+                                desc="Social environments require strong rules: safety, respect, and consequences."
                             />
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
@@ -316,9 +317,9 @@ export default function LearnAirportFleetPage() {
                                     <Bullets
                                         items={[
                                             "No harassment, intimidation, or discrimination",
-                                            "No reckless driving or unsafe behavior",
-                                            "Compliance-first behavior in dense zones",
-                                            "Support escalation for disputes or issues",
+                                            "No unsafe driving or dangerous stopping behavior",
+                                            "Respectful communication standards",
+                                            "Support escalation and dispute handling",
                                             "Suspension/removal may occur for repeated violations",
                                         ]}
                                     />
@@ -353,19 +354,19 @@ export default function LearnAirportFleetPage() {
                             <div className="grid gap-3">
                                 {[
                                     {
-                                        q: "Do you guarantee flight timing?",
-                                        a: "No. Travel is affected by traffic, airport processes, and schedule changes. We focus on readiness and coordination culture.",
+                                        q: "Is this only for expensive restaurants?",
+                                        a: "No. It’s a standards-first pickup culture designed for any venue where presentation and calm exits matter.",
                                     },
                                     {
-                                        q: "Can I book airport trips for guests?",
-                                        a: "Yes. Airport flow supports hospitality and executive arrivals where available.",
+                                        q: "What if the venue pickup is crowded?",
+                                        a: "Use clear landmarks and choose safer stop points. If needed, use support escalation for coordination.",
                                     },
                                     {
-                                        q: "What if my pickup point changes?",
-                                        a: "Use calm coordination and support escalation if needed.",
+                                        q: "What if someone harasses me?",
+                                        a: "Use support escalation immediately. Repeated violations can lead to restrictions or removal.",
                                     },
                                     {
-                                        q: "Where are the rules written?",
+                                        q: "Where are rules written?",
                                         a: "Safety Guidelines, Acceptable Use, Terms of Service, and Privacy Policy.",
                                     },
                                 ].map((x) => (
@@ -406,7 +407,7 @@ export default function LearnAirportFleetPage() {
                                 </div>
 
                                 <div className="mt-5 flex flex-wrap gap-2">
-                                    {["Airports", "Scheduled trips", "Reliability", "Fleet readiness"].map((t) => (
+                                    {["Lifestyle", "Venues", "Clean arrival", "Calm pickup"].map((t) => (
                                         <span key={t} className={CHIP}>
                                             {t}
                                         </span>
@@ -414,7 +415,7 @@ export default function LearnAirportFleetPage() {
                                 </div>
                             </Panel>
 
-                           
+                            
                         </div>
                     </aside>
                 </div>

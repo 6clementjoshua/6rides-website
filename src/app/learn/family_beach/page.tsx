@@ -1,4 +1,4 @@
-// src/app/learn/airport_fleet/page.tsx
+// src/app/learn/family_beach/page.tsx
 "use client";
 
 import Image from "next/image";
@@ -87,7 +87,7 @@ function Bullets({ items }: { items: string[] }) {
     );
 }
 
-export default function LearnAirportFleetPage() {
+export default function LearnFamilyBeachPage() {
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Header */}
@@ -117,8 +117,8 @@ export default function LearnAirportFleetPage() {
                 >
                     <div className="relative h-[360px] sm:h-[440px] md:h-[540px]">
                         <Image
-                            src="/images/6ride/infrastructure/6ride_airport_fleet_lineup.png"
-                            alt="6ride fleet lineup at airport"
+                            src="/images/6ride/lifestyle/6ride_family_beach_lifestyle.png"
+                            alt="6ride family lifestyle transport"
                             fill
                             className="object-contain md:object-cover"
                             priority
@@ -128,28 +128,26 @@ export default function LearnAirportFleetPage() {
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
                             <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
-                                    Operations • Fleet readiness
+                                    Lifestyle • Family movement
                                 </div>
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
-                                    Fleet readiness for scheduled operations.
+                                    Family trips made smoother.
                                 </h1>
                                 <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    Airport transfers and scheduled trips depend on reliability. 6ride is structured to
-                                    run disciplined operations with predictable service, clean presentation, and support
-                                    escalation — so pickups feel organized, not chaotic.
+                                    When comfort matters — outings, weekend trips, and family movement — 6ride focuses on
+                                    cleaner vehicles, calmer pickups, and more predictable service so parents feel less stress
+                                    and families feel safer.
                                 </p>
 
                                 <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Scheduled pickups", "Airport transfers", "Reliable timing", "Support escalation"].map(
-                                        (c) => (
-                                            <span
-                                                key={c}
-                                                className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
-                                            >
-                                                {c}
-                                            </span>
-                                        )
-                                    )}
+                                    {["Calm pickups", "Clean rides", "Family comfort", "Predictable service"].map((c) => (
+                                        <span
+                                            key={c}
+                                            className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                        >
+                                            {c}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -164,35 +162,35 @@ export default function LearnAirportFleetPage() {
                         <Panel>
                             <Section
                                 eyebrow="Full explanation"
-                                title="Airports punish disorganization"
-                                desc="Airport movement is timing-sensitive: flights, security, traffic, queues, and luggage. This page explains how 6ride approaches airport operations — readiness, clean presentation, and predictable coordination."
+                                title="Family movement needs calm structure"
+                                desc="With family trips, stress comes from uncertainty: late pickups, dirty interiors, unpredictable driving, and poor coordination. This page explains how 6ride is designed to reduce friction and support calmer family movement."
                             />
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">
-                                        What goes wrong with airport pickups
+                                        What families dislike
                                     </div>
                                     <Bullets
                                         items={[
-                                            "Late arrivals without clear coordination",
-                                            "Poor communication about where to meet",
-                                            "Messy vehicles for travelers with luggage",
-                                            "No escalation path when schedules shift",
+                                            "Dirty cabins and unpleasant smells",
+                                            "Chaotic pickups with unclear arrival behavior",
+                                            "Aggressive driving that scares children",
+                                            "Disrespectful talk or uncomfortable behavior",
                                         ]}
                                     />
                                 </Tile>
 
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">
-                                        The 6ride airport standard
+                                        The 6ride family standard
                                     </div>
                                     <Bullets
                                         items={[
-                                            "Predictable behavior and coordination mindset",
-                                            "Cleaner presentation for first impressions",
-                                            "Luggage-friendly movement culture",
-                                            "Support escalation when plans change",
+                                            "Clean vehicle presentation and comfort-first posture",
+                                            "Calmer pickup culture and clearer expectations",
+                                            "Safer driving mindset and compliance culture",
+                                            "Support escalation if anything feels off",
                                         ]}
                                     />
                                 </Tile>
@@ -200,11 +198,11 @@ export default function LearnAirportFleetPage() {
 
                             <div className="mt-6 rounded-2xl border border-black/10 bg-neutral-50 p-5">
                                 <div className="text-sm font-semibold text-neutral-950">
-                                    The real goal
+                                    The outcome we want
                                 </div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    Make airport movement feel organized: calmer pickup, cleaner arrival, predictable
-                                    coordination, and a professional finish — because travelers remember the first and last mile.
+                                    A trip that feels organized: calmer pickup, cleaner cabin, safer movement, and a respectful finish.
+                                    That’s what makes family trips smoother.
                                 </p>
                             </div>
                         </Panel>
@@ -213,36 +211,37 @@ export default function LearnAirportFleetPage() {
                         <Panel>
                             <Section
                                 eyebrow="Package contents"
-                                title="What you get in airport fleet readiness"
-                                desc="Airport flow is built around timing discipline and service consistency."
+                                title="What’s included in family-friendly comfort"
+                                desc="These are the standards that create a calmer ride for parents, guardians, and children."
                             />
+
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">
-                                        Service standards
+                                        Experience standards
                                     </div>
                                     <Bullets
                                         items={[
-                                            "Clean vehicle presentation and premium-first mindset",
-                                            "Predictable coordination and calmer pickup culture",
-                                            "Support escalation when flight timing changes",
-                                            "Compliance-first driving behavior in dense zones",
-                                            "Account action possible for repeated violations",
+                                            "Cleaner vehicle presentation and a comfort-first mindset",
+                                            "Calm pickup behavior and clearer service expectations",
+                                            "Safer driving posture (no risky moves for speed)",
+                                            "Respectful communication standards",
+                                            "Support-first escalation when something feels off",
                                         ]}
                                     />
                                 </Tile>
 
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">
-                                        Use cases
+                                        Common family use cases
                                     </div>
                                     <Bullets
                                         items={[
-                                            "Airport pickup and drop-off",
-                                            "Hotel-to-airport and airport-to-office movement",
-                                            "Business travel and executive arrivals",
-                                            "Luggage-friendly movement",
-                                            "Scheduled trips where timing matters",
+                                            "Outings (parks, beaches, gatherings)",
+                                            "Weekend trips and family errands",
+                                            "Restaurants and family events",
+                                            "Campus-related parent visits",
+                                            "Airport/hotel add-on movement when traveling",
                                         ]}
                                     />
                                 </Tile>
@@ -250,9 +249,18 @@ export default function LearnAirportFleetPage() {
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-3">
                                 {[
-                                    { title: "Best for", body: "Travelers, executives, business arrivals, airport schedules, hospitality." },
-                                    { title: "Feels like", body: "Organized pickup + clean presentation + predictable coordination." },
-                                    { title: "Positioning", body: "Premium timing discipline for modern Nigeria movement." },
+                                    {
+                                        title: "Best for",
+                                        body: "Parents, guardians, family outings, weekend movement, calmer city trips.",
+                                    },
+                                    {
+                                        title: "Feels like",
+                                        body: "Clean cabin + calmer pickup + safer movement = lower stress.",
+                                    },
+                                    {
+                                        title: "Positioning",
+                                        body: "Premium family comfort, built on conduct and standards.",
+                                    },
                                 ].map((x) => (
                                     <Tile key={x.title}>
                                         <div className="text-sm font-semibold text-neutral-950">{x.title}</div>
@@ -262,34 +270,34 @@ export default function LearnAirportFleetPage() {
                             </div>
                         </Panel>
 
-                        {/* How it works */}
+                        {/* Flow */}
                         <Panel>
                             <Section
                                 eyebrow="Flow"
-                                title="How airport pickup flow works"
-                                desc="Simple steps that reduce confusion and missed connections."
+                                title="How family trips work"
+                                desc="Simple steps that reduce confusion and keep the ride calm."
                             />
                             <div className="grid gap-3">
                                 {[
                                     {
                                         step: "01",
-                                        title: "Set airport pickup/drop clearly",
-                                        body: "Use the correct terminal/zone and add any notes (entrance, airline, gate/landmark).",
+                                        title: "Set pickup + destination clearly",
+                                        body: "Use a clear landmark. If you’re traveling with children, planning reduces delays and stress.",
                                     },
                                     {
                                         step: "02",
-                                        title: "Coordinate calmly",
-                                        body: "Airport zones can be busy. Clear communication and calmer pickup behavior reduce chaos.",
+                                        title: "Pickup with calm standards",
+                                        body: "The arrival matters: clean presentation, calm behavior, and respectful communication.",
                                     },
                                     {
                                         step: "03",
-                                        title: "Move with compliance-first discipline",
-                                        body: "Dense traffic and enforcement zones require careful, lawful, professional movement.",
+                                        title: "Move with safety-first posture",
+                                        body: "No risky shortcuts. The priority is safer movement and a calm cabin experience.",
                                     },
                                     {
                                         step: "04",
-                                        title: "Finish like a premium service",
-                                        body: "Clean arrival, respectful handover, luggage-friendly support where possible.",
+                                        title: "Drop-off with respect",
+                                        body: "A clean finish and professional behavior — because families remember how the ride felt.",
                                     },
                                 ].map((s) => (
                                     <Tile key={s.step}>
@@ -301,25 +309,25 @@ export default function LearnAirportFleetPage() {
                             </div>
                         </Panel>
 
-                        {/* Policies */}
+                        {/* Child/Student safety alignment */}
                         <Panel>
                             <Section
-                                eyebrow="Trust layer"
-                                title="Operational standards and policy alignment"
-                                desc="Airports require strict conduct. Policies define what’s allowed and what happens when standards are violated."
+                                eyebrow="Safety layer"
+                                title="Child & student safety alignment"
+                                desc="If a trip involves minors, expectations are stricter. We emphasize respectful conduct, safety-first driving, and policy enforcement."
                             />
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">
-                                        What we enforce
+                                        Standards we emphasize
                                     </div>
                                     <Bullets
                                         items={[
-                                            "No harassment, intimidation, or discrimination",
-                                            "No reckless driving or unsafe behavior",
-                                            "Compliance-first behavior in dense zones",
-                                            "Support escalation for disputes or issues",
-                                            "Suspension/removal may occur for repeated violations",
+                                            "No harassment, intimidation, or inappropriate conduct",
+                                            "No reckless driving or unsafe movement",
+                                            "Respectful language and professional behavior",
+                                            "Support escalation if a rider feels unsafe",
+                                            "Account action may occur for repeated violations",
                                         ]}
                                     />
                                 </Tile>
@@ -327,6 +335,9 @@ export default function LearnAirportFleetPage() {
                                 <Tile>
                                     <div className="text-sm font-semibold text-neutral-950">References</div>
                                     <div className="mt-3 flex flex-wrap gap-2">
+                                        <Link className={CHIP} href="/policies/child-student-safety" target="_blank">
+                                            Child & Student Safety
+                                        </Link>
                                         <Link className={CHIP} href="/policies/safety" target="_blank">
                                             Safety Guidelines
                                         </Link>
@@ -336,12 +347,9 @@ export default function LearnAirportFleetPage() {
                                         <Link className={CHIP} href="/policies/terms" target="_blank">
                                             Terms of Service
                                         </Link>
-                                        <Link className={CHIP} href="/policies/privacy" target="_blank">
-                                            Privacy Policy
-                                        </Link>
                                     </div>
                                     <div className="mt-3 text-[12px] text-neutral-800 leading-relaxed">
-                                        These documents define expectations, enforcement, and account actions.
+                                        These documents define expectations, prohibited behavior, and enforcement actions.
                                     </div>
                                 </Tile>
                             </div>
@@ -353,20 +361,20 @@ export default function LearnAirportFleetPage() {
                             <div className="grid gap-3">
                                 {[
                                     {
-                                        q: "Do you guarantee flight timing?",
-                                        a: "No. Travel is affected by traffic, airport processes, and schedule changes. We focus on readiness and coordination culture.",
+                                        q: "Is this a kids-only service?",
+                                        a: "No. It’s a standards-first comfort approach for family trips. When minors are involved, safety expectations are stricter.",
                                     },
                                     {
-                                        q: "Can I book airport trips for guests?",
-                                        a: "Yes. Airport flow supports hospitality and executive arrivals where available.",
+                                        q: "Do you provide child seats?",
+                                        a: "Not guaranteed. Availability depends on location and vehicle options. Always plan ahead if you require one.",
                                     },
                                     {
-                                        q: "What if my pickup point changes?",
-                                        a: "Use calm coordination and support escalation if needed.",
+                                        q: "What if I feel unsafe during a trip?",
+                                        a: "Use support escalation immediately. Repeated violations can lead to restrictions or account removal.",
                                     },
                                     {
-                                        q: "Where are the rules written?",
-                                        a: "Safety Guidelines, Acceptable Use, Terms of Service, and Privacy Policy.",
+                                        q: "Where are rules written?",
+                                        a: "Child & Student Safety, Safety Guidelines, Acceptable Use, and Terms of Service.",
                                     },
                                 ].map((x) => (
                                     <Tile key={x.q}>
@@ -391,22 +399,23 @@ export default function LearnAirportFleetPage() {
                                         Back to home
                                     </Link>
                                     <Link
+                                        href="/policies/child-student-safety"
+                                        target="_blank"
+                                        className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-semibold text-neutral-950 hover:bg-neutral-50"
+                                    >
+                                        Read child & student safety
+                                    </Link>
+                                    <Link
                                         href="/policies/safety"
                                         target="_blank"
                                         className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-semibold text-neutral-950 hover:bg-neutral-50"
                                     >
                                         Read safety guidelines
                                     </Link>
-                                    <Link
-                                        href="/partner"
-                                        className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-semibold text-neutral-950 hover:bg-neutral-50"
-                                    >
-                                        Partner with 6ride
-                                    </Link>
                                 </div>
 
                                 <div className="mt-5 flex flex-wrap gap-2">
-                                    {["Airports", "Scheduled trips", "Reliability", "Fleet readiness"].map((t) => (
+                                    {["Family", "Comfort", "Clean rides", "Safer driving"].map((t) => (
                                         <span key={t} className={CHIP}>
                                             {t}
                                         </span>
