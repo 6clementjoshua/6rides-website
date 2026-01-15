@@ -29,7 +29,7 @@ const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/25 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/5 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
 
 function Panel({ children }: { children: React.ReactNode }) {
     return (
