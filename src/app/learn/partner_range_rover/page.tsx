@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -27,8 +28,9 @@ const TILE_BG =
 const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
+/** ✅ LESS BLACK + more transparent */
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/22 md:bg-black/30 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.14)]";
 
 function Panel({ children }: { children: React.ReactNode }) {
     return (
@@ -88,6 +90,8 @@ function Bullets({ items }: { items: string[] }) {
 }
 
 export default function LearnPartnerRangeRoverPage() {
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Header */}
@@ -114,41 +118,95 @@ export default function LearnPartnerRangeRoverPage() {
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
-                    className="overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
+                    className={cx(
+                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        "bg-transparent md:bg-black"
+                    )}
                 >
                     <div className="relative h-[360px] sm:h-[440px] md:h-[540px]">
                         <Image
                             src="/images/6ride/partner/6ride_partner_vehicle_range_rover_female.png"
                             alt="6ride partner Range Rover with female rider"
                             fill
-                            className="object-contain md:object-cover"
+                            sizes="(max-width: 768px) 100vw, 1100px"
+                            className="object-cover md:object-cover"
                             priority
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/22 to-transparent" />
+
+                        {/* ✅ LESS BLACK on the image overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/18 to-transparent" />
+
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                            <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
+                            <div className={cx(HERO_GLASS, "backdrop-blur-sm md:backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Partner vehicles • SUV class
                                 </div>
+
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
                                     SUV owners: partner with a premium-first brand.
                                 </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    Executive SUVs are in demand for business and lifestyle movement.
-                                    Partner with 6ride and list your SUV under enforced standards and
-                                    premium positioning — clean, calm, and professional.
-                                </p>
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Executive SUV", "Premium standards", "Brand protection", "Verified onboarding"].map(
-                                        (c) => (
+
+                                {/* ✅ MOBILE: tap-to-expand */}
+                                <div className="md:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileExpanded((v) => !v)}
+                                        className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/90 active:bg-white/15"
+                                        aria-expanded={mobileExpanded}
+                                        aria-controls="hero-mobile-details"
+                                    >
+                                        {!mobileExpanded ? (
+                                            <>
+                                                Tap to read more <span className="text-white/70">▾</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                Tap to collapse <span className="text-white/70">▴</span>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <div
+                                        id="hero-mobile-details"
+                                        className={cx(
+                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                                            mobileExpanded ? "mt-2 max-h-[700px] opacity-100" : "max-h-0 opacity-0"
+                                        )}
+                                    >
+                                        <p className="mt-2 text-sm text-white/90 leading-relaxed">
+                                            Executive SUVs are in demand for business and lifestyle movement. Partner with 6ride and list
+                                            your SUV under enforced standards and premium positioning — clean, calm, and professional.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {["Executive SUV", "Premium standards", "Brand protection", "Verified onboarding"].map((c) => (
+                                                <span
+                                                    key={c}
+                                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                >
+                                                    {c}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ DESKTOP: always visible */}
+                                <div className="hidden md:block">
+                                    <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
+                                        Executive SUVs are in demand for business and lifestyle movement. Partner with 6ride and list your
+                                        SUV under enforced standards and premium positioning — clean, calm, and professional.
+                                    </p>
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {["Executive SUV", "Premium standards", "Brand protection", "Verified onboarding"].map((c) => (
                                             <span
                                                 key={c}
                                                 className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
                                             >
                                                 {c}
                                             </span>
-                                        )
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -167,9 +225,7 @@ export default function LearnPartnerRangeRoverPage() {
                             />
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        Why SUVs earn premium
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">Why SUVs earn premium</div>
                                     <Bullets
                                         items={[
                                             "More space and comfort for riders",
@@ -195,12 +251,10 @@ export default function LearnPartnerRangeRoverPage() {
                             </div>
 
                             <div className="mt-6 rounded-2xl border border-black/10 bg-neutral-50 p-5">
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    The point
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">The point</div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    6ride is building an SUV network where owners who maintain standards
-                                    get positioned as premium — and protected as premium.
+                                    6ride is building an SUV network where owners who maintain standards get positioned as premium — and
+                                    protected as premium.
                                 </p>
                             </div>
                         </Panel>
@@ -214,9 +268,7 @@ export default function LearnPartnerRangeRoverPage() {
                             />
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        Vehicle presentation
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">Vehicle presentation</div>
                                     <Bullets
                                         items={[
                                             "Clean interior/exterior consistently",
@@ -275,26 +327,18 @@ export default function LearnPartnerRangeRoverPage() {
                                     },
                                 ].map((s) => (
                                     <Tile key={s.step}>
-                                        <div className="text-xs font-semibold text-neutral-800">
-                                            Step {s.step}
-                                        </div>
-                                        <div className="mt-1 text-sm font-semibold text-neutral-950">
-                                            {s.title}
-                                        </div>
-                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                            {s.body}
-                                        </div>
+                                        <div className="text-xs font-semibold text-neutral-800">Step {s.step}</div>
+                                        <div className="mt-1 text-sm font-semibold text-neutral-950">{s.title}</div>
+                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{s.body}</div>
                                     </Tile>
                                 ))}
                             </div>
 
                             <div className="mt-5 rounded-2xl border border-black/10 bg-neutral-50 p-5">
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    Enforcement note
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">Enforcement note</div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    If standards are repeatedly violated, we may restrict access, suspend,
-                                    or remove a partner to protect the premium brand and rider trust.
+                                    If standards are repeatedly violated, we may restrict access, suspend, or remove a partner to protect
+                                    the premium brand and rider trust.
                                 </p>
                             </div>
                         </Panel>
@@ -308,9 +352,7 @@ export default function LearnPartnerRangeRoverPage() {
                             />
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        Key protections
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">Key protections</div>
                                     <Bullets
                                         items={[
                                             "Verified onboarding requirements",
@@ -322,9 +364,7 @@ export default function LearnPartnerRangeRoverPage() {
                                     />
                                 </Tile>
                                 <Tile>
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        References
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">References</div>
                                     <div className="mt-3 flex flex-wrap gap-2">
                                         <Link className={CHIP} href="/policies/partner-terms" target="_blank">
                                             Partner Terms
@@ -340,8 +380,7 @@ export default function LearnPartnerRangeRoverPage() {
                                         </Link>
                                     </div>
                                     <div className="mt-3 text-[12px] text-neutral-800 leading-relaxed">
-                                        These policies exist to protect premium partners and keep the SUV
-                                        tier credible.
+                                        These policies exist to protect premium partners and keep the SUV tier credible.
                                     </div>
                                 </Tile>
                             </div>
@@ -382,9 +421,7 @@ export default function LearnPartnerRangeRoverPage() {
                     <aside className="md:col-span-4">
                         <div className="sticky top-24 space-y-4">
                             <Panel>
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    Next actions
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">Next actions</div>
                                 <div className="mt-3 grid gap-2">
                                     <Link
                                         href="/partner"
@@ -414,14 +451,10 @@ export default function LearnPartnerRangeRoverPage() {
                                 </div>
                                 <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                     For inquiries or to get started, please contact our partner team at{" "}
-                                    <a
-                                        href="mailto:partnerships@6ride.com"
-                                        className="text-neutral-900 underline"
-                                    >
+                                    <a href="mailto:partnerships@6ride.com" className="text-neutral-900 underline">
                                         partnerships@6ride.com
                                     </a>
                                 </div>
-                               
                             </Panel>
                         </div>
                     </aside>

@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -27,8 +28,9 @@ const TILE_BG =
 const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
+/** ✅ Lighter hero glass + reduced blur on mobile */
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/28 md:bg-black/35 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.14)]";
 
 function Panel({ children }: { children: React.ReactNode }) {
     return (
@@ -88,6 +90,9 @@ function Bullets({ items }: { items: string[] }) {
 }
 
 export default function LearnPartnerAudiMalePage() {
+    // ✅ Mobile-only: tap-to-expand hero details
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Header */}
@@ -113,41 +118,100 @@ export default function LearnPartnerAudiMalePage() {
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
-                    className="overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
+                    className={cx(
+                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        // ✅ mobile: avoid outer black edge showing around contain/letterbox
+                        "bg-transparent md:bg-black"
+                    )}
                 >
                     <div className="relative h-[360px] sm:h-[440px] md:h-[540px]">
                         <Image
                             src="/images/6ride/partner/6ride_partner_vehicle_audi_male.png"
                             alt="6ride partner Audi premium with male rider"
                             fill
-                            className="object-contain md:object-cover"
+                            // ✅ mobile cover prevents empty borders; desktop stays cover
+                            className="object-cover md:object-cover"
                             priority
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/22 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/22 to-transparent" />
+
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                            <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
+                            {/* ✅ reduced blur intensity + lighter glass */}
+                            <div className={cx(HERO_GLASS, "backdrop-blur-sm md:backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Partner vehicles • Premium sedans
                                 </div>
+
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
                                     Premium sedans. Premium rules. Premium earnings.
                                 </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    Sedans win when they’re clean, calm, and professional. This partner tier
-                                    is built for owners who can maintain standards consistently — because
-                                    that’s how premium earnings stay real.
-                                </p>
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Verified onboarding", "Brand protection", "Premium positioning", "Standards enforcement"].map(
-                                        (c) => (
-                                            <span
-                                                key={c}
-                                                className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
-                                            >
-                                                {c}
-                                            </span>
-                                        )
-                                    )}
+
+                                {/* ✅ MOBILE: hint + tap-to-expand */}
+                                <div className="md:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileExpanded((v) => !v)}
+                                        className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/90 active:bg-white/15"
+                                        aria-expanded={mobileExpanded}
+                                        aria-controls="hero-mobile-details"
+                                    >
+                                        {!mobileExpanded ? (
+                                            <>
+                                                Tap to read more <span className="text-white/70">▾</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                Tap to collapse <span className="text-white/70">▴</span>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <div
+                                        id="hero-mobile-details"
+                                        className={cx(
+                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                                            mobileExpanded ? "mt-2 max-h-[720px] opacity-100" : "max-h-0 opacity-0"
+                                        )}
+                                    >
+                                        <p className="mt-2 text-sm text-white/90 leading-relaxed">
+                                            Sedans win when they’re clean, calm, and professional. This partner tier is built for owners who
+                                            can maintain standards consistently — because that’s how premium earnings stay real.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {["Verified onboarding", "Brand protection", "Premium positioning", "Standards enforcement"].map(
+                                                (c) => (
+                                                    <span
+                                                        key={c}
+                                                        className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                    >
+                                                        {c}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ DESKTOP: unchanged (always visible) */}
+                                <div className="hidden md:block">
+                                    <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
+                                        Sedans win when they’re clean, calm, and professional. This partner tier is built for owners who can
+                                        maintain standards consistently — because that’s how premium earnings stay real.
+                                    </p>
+
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {["Verified onboarding", "Brand protection", "Premium positioning", "Standards enforcement"].map(
+                                            (c) => (
+                                                <span
+                                                    key={c}
+                                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                >
+                                                    {c}
+                                                </span>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -199,9 +263,8 @@ export default function LearnPartnerAudiMalePage() {
                                     The 6ride approach
                                 </div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    We build a sedan partner network city-by-city — with verification,
-                                    standards, and consequences — so premium customers stay confident and
-                                    premium partners stay protected.
+                                    We build a sedan partner network city-by-city — with verification, standards, and consequences — so
+                                    premium customers stay confident and premium partners stay protected.
                                 </p>
                             </div>
                         </Panel>
@@ -294,8 +357,8 @@ export default function LearnPartnerAudiMalePage() {
                                     Enforcement note
                                 </div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    Premium earnings require premium consistency. Repeated violations of standards
-                                    can lead to restrictions, suspension, or removal to protect the brand and riders.
+                                    Premium earnings require premium consistency. Repeated violations of standards can lead to
+                                    restrictions, suspension, or removal to protect the brand and riders.
                                 </p>
                             </div>
                         </Panel>
@@ -381,9 +444,7 @@ export default function LearnPartnerAudiMalePage() {
                     <aside className="md:col-span-4">
                         <div className="sticky top-24 space-y-4">
                             <Panel>
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    Next actions
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">Next actions</div>
                                 <div className="mt-3 grid gap-2">
                                     <Link
                                         href="/partner"
@@ -421,14 +482,10 @@ export default function LearnPartnerAudiMalePage() {
                                 </div>
                                 <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                     For inquiries or to get started, please contact our partner team at{" "}
-                                    <a
-                                        href="mailto:partnerships@6ride.com"
-                                        className="text-neutral-900 underline"
-                                    >
+                                    <a href="mailto:partnerships@6ride.com" className="text-neutral-900 underline">
                                         partnerships@6ride.com
                                     </a>
                                 </div>
-                                
                             </Panel>
                         </div>
                     </aside>

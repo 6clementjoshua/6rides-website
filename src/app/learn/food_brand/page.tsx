@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -29,11 +30,17 @@ const TILE_INSET =
 const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
-/** Dark hero glass ONLY (on image) */
+/** ✅ Lighter hero glass + reduced blur on mobile */
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/28 md:bg-black/35 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.14)]";
 
-function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
+function Panel({
+    children,
+    className,
+}: {
+    children: React.ReactNode;
+    className?: string;
+}) {
     return (
         <div className={cx(WATER_PANEL, WATER_INSET, WATER_EDGE, className)}>
             <div className="relative z-10">{children}</div>
@@ -41,7 +48,13 @@ function Panel({ children, className }: { children: React.ReactNode; className?:
     );
 }
 
-function TileCard({ children, className }: { children: React.ReactNode; className?: string }) {
+function TileCard({
+    children,
+    className,
+}: {
+    children: React.ReactNode;
+    className?: string;
+}) {
     return (
         <div className={cx(TILE, TILE_INSET, className)}>
             <div className="relative z-10">{children}</div>
@@ -91,6 +104,9 @@ function BulletList({ items }: { items: string[] }) {
 }
 
 export default function LearnFoodBrandPage() {
+    // ✅ Mobile-only: tap-to-expand hero details
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Top bar */}
@@ -99,13 +115,13 @@ export default function LearnFoodBrandPage() {
                     <Link href="/" className="flex items-center gap-2">
                         <Image
                             src="/6logo.PNG"
-                            alt="6Rides"
+                            alt="6ride"
                             width={28}
                             height={28}
                             className="h-7 w-7"
                             priority
                         />
-                        <span className="text-sm font-semibold text-neutral-950">Rides</span>
+                        <span className="text-sm font-semibold text-neutral-950">ride</span>
                     </Link>
 
                     <Link
@@ -124,15 +140,20 @@ export default function LearnFoodBrandPage() {
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
-                    className="overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
+                    className={cx(
+                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        // ✅ mobile: avoid outer black edge showing around contain/letterbox
+                        "bg-transparent md:bg-black"
+                    )}
                 >
                     <div className="relative h-[360px] w-full sm:h-[440px] md:h-[540px]">
                         <Image
                             src="/images/6ride/food/6ride_food_delivery_brand_showcase.png"
-                            alt="6Rides food delivery branded rider"
+                            alt="6ride food delivery branded rider"
                             fill
                             sizes="(max-width: 768px) 100vw, 1100px"
-                            className="object-contain md:object-cover"
+                            // ✅ mobile cover prevents empty borders; desktop stays cover too
+                            className="object-cover md:object-cover"
                             priority
                         />
 
@@ -142,30 +163,78 @@ export default function LearnFoodBrandPage() {
                         </div>
 
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                            <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
+                            {/* ✅ reduced blur intensity + lighter glass */}
+                            <div className={cx(HERO_GLASS, "backdrop-blur-sm md:backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Food delivery • Branded operations
                                 </div>
+
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
                                     Food delivery with brand standards.
                                 </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    Not just dispatch — a disciplined delivery system: branded riders,
-                                    protected packaging, and consistent handling that keeps restaurants
-                                    trusted and customers confident.
-                                </p>
 
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Branded riders", "Protected packaging", "Clean handling", "Support escalation"].map(
-                                        (c) => (
+                                {/* ✅ MOBILE: hint + tap-to-expand */}
+                                <div className="md:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileExpanded((v) => !v)}
+                                        className="mt-2 w-full text-left"
+                                        aria-expanded={mobileExpanded}
+                                        aria-controls="hero-mobile-details"
+                                    >
+                                        {!mobileExpanded ? (
+                                            <div className="text-[12px] text-white/80">
+                                                Tap to read more <span className="ml-2 text-white/60">▾</span>
+                                            </div>
+                                        ) : (
+                                            <div className="text-[12px] text-white/80">
+                                                Tap to collapse <span className="ml-2 text-white/60">▴</span>
+                                            </div>
+                                        )}
+                                    </button>
+
+                                    <div
+                                        id="hero-mobile-details"
+                                        className={cx(
+                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                                            mobileExpanded ? "max-h-[560px] opacity-100" : "max-h-0 opacity-0"
+                                        )}
+                                    >
+                                        <p className="mt-2 text-sm text-white/90 leading-relaxed">
+                                            Not just dispatch — a disciplined delivery system: branded riders, protected packaging, and
+                                            consistent handling that keeps restaurants trusted and customers confident.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {["Branded riders", "Protected packaging", "Clean handling", "Support escalation"].map((c) => (
+                                                <span
+                                                    key={c}
+                                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                >
+                                                    {c}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ DESKTOP: unchanged (always visible) */}
+                                <div className="hidden md:block">
+                                    <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
+                                        Not just dispatch — a disciplined delivery system: branded riders, protected packaging, and
+                                        consistent handling that keeps restaurants trusted and customers confident.
+                                    </p>
+
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {["Branded riders", "Protected packaging", "Clean handling", "Support escalation"].map((c) => (
                                             <span
                                                 key={c}
                                                 className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
                                             >
                                                 {c}
                                             </span>
-                                        )
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -339,15 +408,9 @@ export default function LearnFoodBrandPage() {
                                         <TileCard key={s.step} className="p-5">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div>
-                                                    <div className="text-xs font-semibold text-neutral-800">
-                                                        Step {s.step}
-                                                    </div>
-                                                    <div className="mt-1 text-sm font-semibold text-neutral-950">
-                                                        {s.title}
-                                                    </div>
-                                                    <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                                        {s.body}
-                                                    </div>
+                                                    <div className="text-xs font-semibold text-neutral-800">Step {s.step}</div>
+                                                    <div className="mt-1 text-sm font-semibold text-neutral-950">{s.title}</div>
+                                                    <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{s.body}</div>
                                                 </div>
                                                 <div className="hidden sm:block rounded-2xl border border-black/10 bg-white px-3 py-2 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]">
                                                     Standard
@@ -374,9 +437,7 @@ export default function LearnFoodBrandPage() {
 
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            What we enforce
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">What we enforce</div>
                                         <BulletList
                                             items={[
                                                 "No tampering with orders or packaging",
@@ -389,9 +450,7 @@ export default function LearnFoodBrandPage() {
                                     </TileCard>
 
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            Relevant policy references
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">Relevant policy references</div>
                                         <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                             Read these for the detailed rules behind delivery conduct:
                                         </p>
@@ -445,12 +504,8 @@ export default function LearnFoodBrandPage() {
                                         },
                                     ].map((item) => (
                                         <TileCard key={item.q} className="p-5">
-                                            <div className="text-sm font-semibold text-neutral-950">
-                                                {item.q}
-                                            </div>
-                                            <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                                {item.a}
-                                            </div>
+                                            <div className="text-sm font-semibold text-neutral-950">{item.q}</div>
+                                            <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{item.a}</div>
                                         </TileCard>
                                     ))}
                                 </div>
@@ -467,9 +522,7 @@ export default function LearnFoodBrandPage() {
                     >
                         <div className="sticky top-24">
                             <Panel className="p-5">
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    Next actions
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">Next actions</div>
 
                                 <div className="mt-3 grid gap-2">
                                     <Link
@@ -506,13 +559,13 @@ export default function LearnFoodBrandPage() {
 
                                 <div className="mt-5 rounded-2xl border border-black/10 bg-white p-4 shadow-[0_12px_30px_rgba(0,0,0,0.06)]">
                                     <div className="text-[11px] font-semibold text-neutral-900">
-                                        We appreciate your interest in 6Rides Food Delivery.
+                                        We appreciate your interest in 6ride Food Delivery.
                                     </div>
                                     <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                         For inquiries or to get started, please contact our sales team at{" "}
                                         <a
                                             href="mailto:sales@6rides.com"
-                                            className="text-blue-600 hover:underline"
+                                            className="font-semibold text-black hover:text-neutral-800"
                                         >
                                             sales@6rides.com
                                         </a>

@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -27,9 +28,9 @@ const TILE_INSET =
 const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
-/** Dark hero glass only (on image) */
+/** ✅ Lighter hero glass + reduced blur (mobile) */
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/28 md:bg-black/35 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.14)]";
 
 function Panel({
     children,
@@ -101,6 +102,9 @@ function BulletList({ items }: { items: string[] }) {
 }
 
 export default function LearnEmergencyPage() {
+    // ✅ Mobile-only: tap-to-expand hero details
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Top bar */}
@@ -109,13 +113,13 @@ export default function LearnEmergencyPage() {
                     <Link href="/" className="flex items-center gap-2">
                         <Image
                             src="/6logo.PNG"
-                            alt="6Rides"
+                            alt="6ride"
                             width={28}
                             height={28}
                             className="h-7 w-7"
                             priority
                         />
-                        <span className="text-sm font-semibold text-neutral-950">Rides</span>
+                        <span className="text-sm font-semibold text-neutral-950">ride</span>
                     </Link>
 
                     <Link
@@ -134,15 +138,20 @@ export default function LearnEmergencyPage() {
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
-                    className="overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
+                    className={cx(
+                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        // ✅ mobile: transparent prevents any visible “outer layer”
+                        "bg-transparent md:bg-black"
+                    )}
                 >
                     <div className="relative h-[360px] w-full sm:h-[440px] md:h-[540px]">
                         <Image
                             src="/images/6ride/emergency/6ride_emergency_medical_street_response.png"
-                            alt="6Rides emergency response vehicle assisting on the street"
+                            alt="6ride emergency response vehicle assisting on the street"
                             fill
                             sizes="(max-width: 768px) 100vw, 1100px"
-                            className="object-contain md:object-cover"
+                            // ✅ key fix: no contain on mobile -> removes the white/grey edges
+                            className="object-cover md:object-cover"
                             priority
                         />
 
@@ -152,33 +161,82 @@ export default function LearnEmergencyPage() {
                         </div>
 
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                            <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
+                            {/* ✅ reduced blur intensity + lighter glass */}
+                            <div className={cx(HERO_GLASS, "backdrop-blur-sm md:backdrop-blur-md select-none")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Emergency • Humanitarian aid transport support
                                 </div>
-                                <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
-                                    6Rides Emergency Program — support when minutes matter.
-                                </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    This is a humanitarian aid program that uses the 6Rides network to
-                                    support urgent transport coordination — with safety-first rules and
-                                    clear limitations.
-                                </p>
 
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {[
-                                        "Members-first response",
-                                        "Transport coordination",
-                                        "Safety-first rules",
-                                        "Clear limitations",
-                                    ].map((c) => (
-                                        <span
-                                            key={c}
-                                            className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
-                                        >
-                                            {c}
-                                        </span>
-                                    ))}
+                                <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
+                                    6ride Emergency Program — support when minutes matter.
+                                </h1>
+
+                                {/* ✅ MOBILE: hint + tap-to-expand */}
+                                <div className="md:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileExpanded((v) => !v)}
+                                        className="mt-2 w-full text-left"
+                                        aria-expanded={mobileExpanded}
+                                        aria-controls="hero-mobile-details"
+                                    >
+                                        {!mobileExpanded ? (
+                                            <div className="text-[12px] text-white/80">
+                                                Tap to read more <span className="ml-2 text-white/60">▾</span>
+                                            </div>
+                                        ) : (
+                                            <div className="text-[12px] text-white/80">
+                                                Tap to collapse <span className="ml-2 text-white/60">▴</span>
+                                            </div>
+                                        )}
+                                    </button>
+
+                                    <div
+                                        id="hero-mobile-details"
+                                        className={cx(
+                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                                            mobileExpanded ? "max-h-[520px] opacity-100" : "max-h-0 opacity-0"
+                                        )}
+                                    >
+                                        <p className="mt-2 text-sm text-white/90 leading-relaxed">
+                                            This is a humanitarian aid program that uses the 6ride network to support urgent transport
+                                            coordination — with safety-first rules and clear limitations.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {["Members-first response", "Transport coordination", "Safety-first rules", "Clear limitations"].map(
+                                                (c) => (
+                                                    <span
+                                                        key={c}
+                                                        className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                    >
+                                                        {c}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ DESKTOP: unchanged (always visible) */}
+                                <div className="hidden md:block">
+                                    <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
+                                        This is a humanitarian aid program that uses the 6ride network to support urgent transport
+                                        coordination — with safety-first rules and clear limitations.
+                                    </p>
+
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {["Members-first response", "Transport coordination", "Safety-first rules", "Clear limitations"].map(
+                                            (c) => (
+                                                <span
+                                                    key={c}
+                                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                >
+                                                    {c}
+                                                </span>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -199,17 +257,15 @@ export default function LearnEmergencyPage() {
                                 <SectionTitle
                                     eyebrow="Important clarification (read carefully)"
                                     title="We are NOT a hospital, clinic, ambulance, or medical provider"
-                                    desc="6Rides does not operate hospitals, clinics, pharmacies, or health centers. We do not provide medical treatment, diagnosis, emergency medical procedures, or clinical services. This program is humanitarian aid transport support — focused on helping our Emergency Program members get coordinated movement support in urgent situations."
+                                    desc="6ride does not operate hospitals, clinics, pharmacies, or health centers. We do not provide medical treatment, diagnosis, emergency medical procedures, or clinical services. This program is humanitarian aid transport support — focused on helping our Emergency Program members get coordinated movement support in urgent situations."
                                 />
 
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            What we do
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">What we do</div>
                                         <BulletList
                                             items={[
-                                                "Coordinate urgent transport support using the 6Rides network",
+                                                "Coordinate urgent transport support using the 6ride network",
                                                 "Support Emergency Program members with higher priority",
                                                 "Provide clear updates, calm handling, and non-escalation conduct",
                                                 "Escalate to support when conditions are unsafe or unclear",
@@ -218,9 +274,7 @@ export default function LearnEmergencyPage() {
                                     </TileCard>
 
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            What we do NOT do
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">What we do NOT do</div>
                                         <BulletList
                                             items={[
                                                 "We do not run hospitals or clinics",
@@ -233,14 +287,11 @@ export default function LearnEmergencyPage() {
                                 </div>
 
                                 <div className="mt-6 rounded-2xl border border-black/10 bg-white p-5 shadow-[0_12px_30px_rgba(0,0,0,0.06)]">
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        If you need medical attention
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">If you need medical attention</div>
                                     <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                        Please contact the nearest hospital, clinic, or local emergency
-                                        services immediately. Use 6Rides Emergency Program only as additional
-                                        transport support (especially for subscribed members) when it is safe
-                                        and appropriate to do so.
+                                        Please contact the nearest hospital, clinic, or local emergency services immediately. Use 6ride
+                                        Emergency Program only as additional transport support (especially for subscribed members) when it is
+                                        safe and appropriate to do so.
                                     </p>
                                 </div>
                             </Panel>
@@ -261,9 +312,7 @@ export default function LearnEmergencyPage() {
 
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            Member-first support (priority)
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">Member-first support (priority)</div>
                                         <BulletList
                                             items={[
                                                 "Members are prioritized for response coordination",
@@ -286,9 +335,8 @@ export default function LearnEmergencyPage() {
                                             Apply for an Emergency Membership Card
                                         </div>
                                         <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                            To get an Emergency Membership Card, contact us for the application
-                                            steps, eligibility, pricing, and city availability. We’ll guide you
-                                            through how membership works.
+                                            To get an Emergency Membership Card, contact us for the application steps, eligibility, pricing,
+                                            and city availability. We’ll guide you through how membership works.
                                         </p>
 
                                         <div className="mt-4 flex flex-wrap gap-2">
@@ -308,21 +356,18 @@ export default function LearnEmergencyPage() {
                                         </div>
 
                                         <div className="mt-3 text-[12px] text-neutral-800 leading-relaxed">
-                                            Note: Membership is subject to verification and program rules.
-                                            Availability may vary by city and operational capacity.
+                                            Note: Membership is subject to verification and program rules. Availability may vary by city and
+                                            operational capacity.
                                         </div>
                                     </TileCard>
                                 </div>
 
                                 <div className="mt-6 rounded-2xl border border-black/10 bg-neutral-50 p-5">
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        Public assistance (non-members)
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">Public assistance (non-members)</div>
                                     <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                        We may, at our discretion and within our operational jurisdiction,
-                                        respond to emergencies that come our way. However, members receive
-                                        dedicated attention and higher priority because the program is built
-                                        to serve subscribed participants first.
+                                        We may, at our discretion and within our operational jurisdiction, respond to emergencies that come
+                                        our way. However, members receive dedicated attention and higher priority because the program is
+                                        built to serve subscribed participants first.
                                     </p>
                                 </div>
                             </Panel>
@@ -372,15 +417,9 @@ export default function LearnEmergencyPage() {
                                         <TileCard key={s.step} className="p-5">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div>
-                                                    <div className="text-xs font-semibold text-neutral-800">
-                                                        Step {s.step}
-                                                    </div>
-                                                    <div className="mt-1 text-sm font-semibold text-neutral-950">
-                                                        {s.title}
-                                                    </div>
-                                                    <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                                        {s.body}
-                                                    </div>
+                                                    <div className="text-xs font-semibold text-neutral-800">Step {s.step}</div>
+                                                    <div className="mt-1 text-sm font-semibold text-neutral-950">{s.title}</div>
+                                                    <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{s.body}</div>
                                                 </div>
                                                 <div className="hidden sm:block rounded-2xl border border-black/10 bg-white px-3 py-2 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]">
                                                     Safety-first
@@ -407,9 +446,7 @@ export default function LearnEmergencyPage() {
 
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            What protects the public
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">What protects the public</div>
                                         <BulletList
                                             items={[
                                                 "Clear statement: we do not provide medical treatment",
@@ -421,9 +458,7 @@ export default function LearnEmergencyPage() {
                                     </TileCard>
 
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            Misuse and account action
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">Misuse and account action</div>
                                         <BulletList
                                             items={[
                                                 "No false emergencies or impersonation",
@@ -451,9 +486,8 @@ export default function LearnEmergencyPage() {
                                 </div>
 
                                 <div className="mt-3 text-[12px] text-neutral-800 leading-relaxed">
-                                    These documents exist to protect members, the public, drivers, and the
-                                    6Rides brand — and to prevent the program being mistaken as a medical
-                                    provider.
+                                    These documents exist to protect members, the public, drivers, and the 6ride brand — and to prevent the
+                                    program being mistaken as a medical provider.
                                 </div>
                             </Panel>
                         </motion.div>
@@ -470,7 +504,7 @@ export default function LearnEmergencyPage() {
                                     {[
                                         {
                                             q: "Do you run a hospital or clinic?",
-                                            a: "No. 6Rides does not operate hospitals, clinics, or health centers. We provide transport coordination support for Emergency Program members.",
+                                            a: "No. 6ride does not operate hospitals, clinics, or health centers. We provide transport coordination support for Emergency Program members.",
                                         },
                                         {
                                             q: "Do you provide medical treatment?",
@@ -478,7 +512,7 @@ export default function LearnEmergencyPage() {
                                         },
                                         {
                                             q: "Who gets priority?",
-                                            a: "Subscribed members of the 6Rides Emergency Program receive priority attention. We may still respond to public emergencies at our discretion.",
+                                            a: "Subscribed members of the 6ride Emergency Program receive priority attention. We may still respond to public emergencies at our discretion.",
                                         },
                                         {
                                             q: "How do I apply for the membership card?",
@@ -486,12 +520,8 @@ export default function LearnEmergencyPage() {
                                         },
                                     ].map((item) => (
                                         <TileCard key={item.q} className="p-5">
-                                            <div className="text-sm font-semibold text-neutral-950">
-                                                {item.q}
-                                            </div>
-                                            <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                                {item.a}
-                                            </div>
+                                            <div className="text-sm font-semibold text-neutral-950">{item.q}</div>
+                                            <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{item.a}</div>
                                         </TileCard>
                                     ))}
                                 </div>
@@ -508,9 +538,7 @@ export default function LearnEmergencyPage() {
                     >
                         <div className="sticky top-24">
                             <Panel className="p-5">
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    Next actions
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">Next actions</div>
 
                                 <div className="mt-3 grid gap-2">
                                     <Link
@@ -536,32 +564,25 @@ export default function LearnEmergencyPage() {
                                 </div>
 
                                 <div className="mt-5 flex flex-wrap gap-2">
-                                    {[
-                                        "Humanitarian aid",
-                                        "Members-first",
-                                        "Not medical care",
-                                        "Transport support",
-                                        "Accountability",
-                                    ].map((t) => (
-                                        <span key={t} className={CHIP}>
-                                            {t}
-                                        </span>
-                                    ))}
+                                    {["Humanitarian aid", "Members-first", "Not medical care", "Transport support", "Accountability"].map(
+                                        (t) => (
+                                            <span key={t} className={CHIP}>
+                                                {t}
+                                            </span>
+                                        )
+                                    )}
                                 </div>
 
                                 <div className="mt-5 rounded-2xl border border-black/10 bg-neutral-50 p-4">
-                                    <div className="text-[11px] font-semibold text-neutral-900">
-                                        Reminder
-                                    </div>
+                                    <div className="text-[11px] font-semibold text-neutral-900">Reminder</div>
                                     <div className="mt-1 text-[12px] text-neutral-800 leading-relaxed">
-                                        For medical emergencies, contact the nearest hospital or local
-                                        emergency services first.
+                                        For medical emergencies, contact the nearest hospital or local emergency services first.
                                     </div>
                                 </div>
 
                                 <div className="mt-5 rounded-2xl border border-black/10 bg-white p-4 shadow-[0_12px_30px_rgba(0,0,0,0.06)]">
                                     <div className="text-[11px] font-semibold text-neutral-900">
-                                        Contact us for your 6Rides Emergency Program membership today
+                                        Contact us for your 6ride Emergency Program membership today
                                     </div>
                                     <div className="mt-1 text-[12px] text-neutral-800 leading-relaxed">
                                         For inquiries or to get started, please contact our team at{" "}
@@ -569,10 +590,9 @@ export default function LearnEmergencyPage() {
                                             href="mailto:emergency@6rides.com"
                                             className="font-semibold text-black hover:text-neutral-800"
                                         >
-                                            Emergency@6rides.com
+                                            emergency@6rides.com
                                         </a>
                                     </div>
-                                    
                                 </div>
                             </Panel>
                         </div>

@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -32,9 +33,9 @@ const TILE_INSET =
 const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
-/** Dark hero glass ONLY (on image) */
+/** ✅ Lighter hero glass + reduced blur on mobile */
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/28 md:bg-black/35 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.14)]";
 
 function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
     return (
@@ -64,17 +65,11 @@ function SectionTitle({
     return (
         <div className="mb-4">
             {eyebrow ? (
-                <div className="text-[11px] font-semibold tracking-wide text-neutral-800">
-                    {eyebrow}
-                </div>
+                <div className="text-[11px] font-semibold tracking-wide text-neutral-800">{eyebrow}</div>
             ) : null}
-            <h2 className="mt-1 text-xl font-semibold text-neutral-950 md:text-2xl">
-                {title}
-            </h2>
+            <h2 className="mt-1 text-xl font-semibold text-neutral-950 md:text-2xl">{title}</h2>
             {desc ? (
-                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-neutral-800">
-                    {desc}
-                </p>
+                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-neutral-800">{desc}</p>
             ) : null}
         </div>
     );
@@ -94,21 +89,17 @@ function BulletList({ items }: { items: string[] }) {
 }
 
 export default function LearnHeroPage() {
+    // ✅ Mobile-only: tap-to-expand hero details
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Top bar */}
             <header className="sticky top-0 z-30 border-b border-black/10 bg-white">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
                     <Link href="/" className="flex items-center gap-2">
-                        <Image
-                            src="/6logo.PNG"
-                            alt="6Rides"
-                            width={28}
-                            height={28}
-                            className="h-7 w-7"
-                            priority
-                        />
-                        <span className="text-sm font-semibold text-neutral-950">Rides</span>
+                        <Image src="/6logo.PNG" alt="6ride" width={28} height={28} className="h-7 w-7" priority />
+                        <span className="text-sm font-semibold text-neutral-950">ride</span>
                     </Link>
 
                     <Link
@@ -127,15 +118,20 @@ export default function LearnHeroPage() {
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
-                    className="overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
+                    className={cx(
+                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        // ✅ mobile: avoid outer black edge showing around contain/letterbox
+                        "bg-transparent md:bg-black"
+                    )}
                 >
                     <div className="relative h-[360px] w-full sm:h-[440px] md:h-[540px]">
                         <Image
                             src="/images/6ride/lifestyle/6ride_shopping_trunk_loading.png"
-                            alt="6Rides premium lifestyle pickup after shopping"
+                            alt="6ride premium lifestyle pickup after shopping"
                             fill
                             sizes="(max-width: 768px) 100vw, 1100px"
-                            className="object-contain md:object-cover"
+                            // ✅ mobile cover prevents empty borders; desktop stays cover
+                            className="object-cover md:object-cover"
                             priority
                         />
 
@@ -145,31 +141,78 @@ export default function LearnHeroPage() {
                         </div>
 
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                            <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
+                            {/* ✅ reduced blur intensity + lighter glass */}
+                            <div className={cx(HERO_GLASS, "backdrop-blur-sm md:backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Lifestyle • Shopping • Tours • Everyday movement
                                 </div>
+
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
                                     Designed for real life, not just rides.
                                 </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    This isn’t “just transport.” It’s a premium movement package
-                                    designed around cleanliness, calm pickups, and predictable
-                                    service — so errands, shopping runs, and lifestyle trips feel
-                                    organized and safe.
-                                </p>
 
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Clean vehicles", "Calm pickups", "Predictable updates", "Premium standards"].map(
-                                        (c) => (
+                                {/* ✅ MOBILE: hint + tap-to-expand */}
+                                <div className="md:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileExpanded((v) => !v)}
+                                        className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/90 active:bg-white/15"
+                                        aria-expanded={mobileExpanded}
+                                        aria-controls="hero-mobile-details"
+                                    >
+                                        {!mobileExpanded ? (
+                                            <>
+                                                Tap to read more <span className="text-white/70">▾</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                Tap to collapse <span className="text-white/70">▴</span>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <div
+                                        id="hero-mobile-details"
+                                        className={cx(
+                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                                            mobileExpanded ? "mt-2 max-h-[640px] opacity-100" : "max-h-0 opacity-0"
+                                        )}
+                                    >
+                                        <p className="mt-2 text-sm text-white/90 leading-relaxed">
+                                            This isn’t “just transport.” It’s a premium movement package designed around cleanliness, calm pickups,
+                                            and predictable service — so errands, shopping runs, and lifestyle trips feel organized and safe.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {["Clean vehicles", "Calm pickups", "Predictable updates", "Premium standards"].map((c) => (
+                                                <span
+                                                    key={c}
+                                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                >
+                                                    {c}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ DESKTOP: unchanged (always visible) */}
+                                <div className="hidden md:block">
+                                    <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
+                                        This isn’t “just transport.” It’s a premium movement package designed around cleanliness, calm pickups,
+                                        and predictable service — so errands, shopping runs, and lifestyle trips feel organized and safe.
+                                    </p>
+
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {["Clean vehicles", "Calm pickups", "Predictable updates", "Premium standards"].map((c) => (
                                             <span
                                                 key={c}
                                                 className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
                                             >
                                                 {c}
                                             </span>
-                                        )
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -194,13 +237,10 @@ export default function LearnHeroPage() {
 
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            Shopping runs (single or multi-stop)
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">Shopping runs (single or multi-stop)</div>
                                         <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                            Clean pickup, structured routing, smoother trunk loading,
-                                            and a calm return — so shopping feels like a planned
-                                            experience, not chaos.
+                                            Clean pickup, structured routing, smoother trunk loading, and a calm return — so shopping feels like a
+                                            planned experience, not chaos.
                                         </p>
                                         <div className="mt-3 flex flex-wrap gap-2">
                                             {["Multi-stop ready", "Trunk-friendly", "Predictable ETA"].map((c) => (
@@ -212,13 +252,10 @@ export default function LearnHeroPage() {
                                     </TileCard>
 
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            City movement + light tours
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">City movement + light tours</div>
                                         <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                            Restaurants, lounges, events, visiting spots — movement that
-                                            requires timing and presentation. The goal is calm arrivals
-                                            and clean exits.
+                                            Restaurants, lounges, events, visiting spots — movement that requires timing and presentation. The
+                                            goal is calm arrivals and clean exits.
                                         </p>
                                         <div className="mt-3 flex flex-wrap gap-2">
                                             {["Clean arrival", "Professional look", "Comfort-first"].map((c) => (
@@ -231,14 +268,11 @@ export default function LearnHeroPage() {
                                 </div>
 
                                 <div className="mt-6 rounded-2xl border border-black/10 bg-white p-5 shadow-[0_12px_30px_rgba(0,0,0,0.06)]">
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        Why this matters in Nigeria
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">Why this matters in Nigeria</div>
                                     <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                        Traffic, rushed pickups, and inconsistent standards create
-                                        stress. This package is designed to reduce friction: clearer
-                                        pickup behavior, better vehicle presentation, predictable
-                                        updates, and a support-first mindset.
+                                        Traffic, rushed pickups, and inconsistent standards create stress. This package is designed to reduce
+                                        friction: clearer pickup behavior, better vehicle presentation, predictable updates, and a support-first
+                                        mindset.
                                     </p>
                                 </div>
                             </Panel>
@@ -258,9 +292,7 @@ export default function LearnHeroPage() {
 
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            Experience standards
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">Experience standards</div>
                                         <BulletList
                                             items={[
                                                 "Cleaner vehicle presentation and premium-first mindset",
@@ -273,9 +305,7 @@ export default function LearnHeroPage() {
                                     </TileCard>
 
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            Movement features
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">Movement features</div>
                                         <BulletList
                                             items={[
                                                 "Shopping pickup + drop (single run)",
@@ -328,15 +358,9 @@ export default function LearnHeroPage() {
                                         <TileCard key={s.step} className="p-5">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div>
-                                                    <div className="text-xs font-semibold text-neutral-800">
-                                                        Step {s.step}
-                                                    </div>
-                                                    <div className="mt-1 text-sm font-semibold text-neutral-950">
-                                                        {s.title}
-                                                    </div>
-                                                    <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                                        {s.body}
-                                                    </div>
+                                                    <div className="text-xs font-semibold text-neutral-800">Step {s.step}</div>
+                                                    <div className="mt-1 text-sm font-semibold text-neutral-950">{s.title}</div>
+                                                    <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{s.body}</div>
                                                 </div>
                                                 <div className="hidden sm:block rounded-2xl border border-black/10 bg-white px-3 py-2 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]">
                                                     Premium flow
@@ -362,9 +386,7 @@ export default function LearnHeroPage() {
 
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            Standards we emphasize
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">Standards we emphasize</div>
                                         <BulletList
                                             items={[
                                                 "Cleanliness and presentation expectations",
@@ -377,9 +399,7 @@ export default function LearnHeroPage() {
                                     </TileCard>
 
                                     <TileCard className="p-5">
-                                        <div className="text-sm font-semibold text-neutral-950">
-                                            Relevant policy references
-                                        </div>
+                                        <div className="text-sm font-semibold text-neutral-950">Relevant policy references</div>
                                         <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                             Read these for the detailed rules behind the experience:
                                         </p>
@@ -418,26 +438,13 @@ export default function LearnHeroPage() {
                                             q: "Is this only for shopping?",
                                             a: "No. It covers errands, tours-style movement, lifestyle runs, and premium city movement.",
                                         },
-                                        {
-                                            q: "Can I do multiple stops?",
-                                            a: "Yes. Multi-stop planning is part of the real-life package feel and reduces stress.",
-                                        },
-                                        {
-                                            q: "What makes it “premium”?",
-                                            a: "Clean presentation, calmer pickup culture, predictable updates, and disciplined service standards.",
-                                        },
-                                        {
-                                            q: "Where can I read the rules?",
-                                            a: "Use the policy links above (Safety, Acceptable Use, Terms, Privacy).",
-                                        },
+                                        { q: "Can I do multiple stops?", a: "Yes. Multi-stop planning is part of the real-life package feel and reduces stress." },
+                                        { q: "What makes it “premium”?", a: "Clean presentation, calmer pickup culture, predictable updates, and disciplined service standards." },
+                                        { q: "Where can I read the rules?", a: "Use the policy links above (Safety, Acceptable Use, Terms, Privacy)." },
                                     ].map((item) => (
                                         <TileCard key={item.q} className="p-5">
-                                            <div className="text-sm font-semibold text-neutral-950">
-                                                {item.q}
-                                            </div>
-                                            <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                                {item.a}
-                                            </div>
+                                            <div className="text-sm font-semibold text-neutral-950">{item.q}</div>
+                                            <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{item.a}</div>
                                         </TileCard>
                                     ))}
                                 </div>
@@ -454,9 +461,7 @@ export default function LearnHeroPage() {
                     >
                         <div className="sticky top-24">
                             <Panel className="p-5">
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    Next actions
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">Next actions</div>
 
                                 <div className="mt-3 grid gap-2">
                                     <Link
@@ -499,18 +504,14 @@ export default function LearnHeroPage() {
 
                                 <div className="mt-5 rounded-2xl border border-black/10 bg-white p-4 shadow-[0_12px_30px_rgba(0,0,0,0.06)]">
                                     <div className="text-[11px] font-semibold text-neutral-900">
-                                        we appreciate your interest in 6Rides Lifestyle Movement.
+                                        We appreciate your interest in 6ride Lifestyle Movement.
                                     </div>
                                     <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                         For inquiries or to get started, please contact our booking team at{" "}
-                                        <a
-                                            href="mailto:booking@6rides.com"
-                                            className="text-blue-600 hover:underline"
-                                        >
+                                        <a href="mailto:booking@6rides.com" className="font-semibold text-black hover:text-neutral-800">
                                             booking@6rides.com
                                         </a>
                                     </div>
-                                    
                                 </div>
                             </Panel>
                         </div>

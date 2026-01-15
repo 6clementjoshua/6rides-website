@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -27,8 +28,9 @@ const TILE_BG =
 const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
+/** ✅ Lighter hero glass + reduced blur on mobile */
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/28 md:bg-black/35 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.14)]";
 
 function Panel({ children }: { children: React.ReactNode }) {
     return (
@@ -88,6 +90,9 @@ function Bullets({ items }: { items: string[] }) {
 }
 
 export default function LearnPartnerBMWFemaleTabletPage() {
+    // ✅ Mobile-only: tap-to-expand hero details
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Header */}
@@ -113,43 +118,101 @@ export default function LearnPartnerBMWFemaleTabletPage() {
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
-                    className="overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
+                    className={cx(
+                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        // ✅ mobile: avoid outer black edge showing around contain/letterbox
+                        "bg-transparent md:bg-black"
+                    )}
                 >
                     <div className="relative h-[360px] sm:h-[440px] md:h-[540px]">
                         <Image
                             src="/images/6ride/partner/6ride_partner_vehicle_bmw_female_tablet.png"
                             alt="6ride partner BMW with female using tablet"
                             fill
-                            className="object-contain md:object-cover"
+                            // ✅ mobile cover prevents empty borders; desktop stays cover
+                            className="object-cover md:object-cover"
                             priority
                         />
+
                         <div className="absolute inset-0 bg-gradient-to-t from-black/76 via-black/22 to-transparent" />
 
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                            <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
+                            <div className={cx(HERO_GLASS, "backdrop-blur-sm md:backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Partner vehicles • Business-ready
                                 </div>
+
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
                                     A partner program designed for professionals.
                                 </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    This tier is for owners who value professionalism: verified onboarding,
-                                    disciplined standards, and a premium rider experience that protects your
-                                    vehicle’s image while building consistent income.
-                                </p>
 
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Verified onboarding", "Premium standards", "Professional conduct", "Brand protection"].map(
-                                        (c) => (
-                                            <span
-                                                key={c}
-                                                className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
-                                            >
-                                                {c}
-                                            </span>
-                                        )
-                                    )}
+                                {/* ✅ MOBILE: hint + tap-to-expand */}
+                                <div className="md:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileExpanded((v) => !v)}
+                                        className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/90 active:bg-white/15"
+                                        aria-expanded={mobileExpanded}
+                                        aria-controls="hero-mobile-details"
+                                    >
+                                        {!mobileExpanded ? (
+                                            <>
+                                                Tap to read more <span className="text-white/70">▾</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                Tap to collapse <span className="text-white/70">▴</span>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <div
+                                        id="hero-mobile-details"
+                                        className={cx(
+                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                                            mobileExpanded ? "mt-2 max-h-[720px] opacity-100" : "max-h-0 opacity-0"
+                                        )}
+                                    >
+                                        <p className="mt-2 text-sm text-white/90 leading-relaxed">
+                                            This tier is for owners who value professionalism: verified onboarding, disciplined standards,
+                                            and a premium rider experience that protects your vehicle’s image while building consistent
+                                            income.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {["Verified onboarding", "Premium standards", "Professional conduct", "Brand protection"].map(
+                                                (c) => (
+                                                    <span
+                                                        key={c}
+                                                        className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                    >
+                                                        {c}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ DESKTOP: unchanged (always visible) */}
+                                <div className="hidden md:block">
+                                    <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
+                                        This tier is for owners who value professionalism: verified onboarding, disciplined standards, and a
+                                        premium rider experience that protects your vehicle’s image while building consistent income.
+                                    </p>
+
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {["Verified onboarding", "Premium standards", "Professional conduct", "Brand protection"].map(
+                                            (c) => (
+                                                <span
+                                                    key={c}
+                                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                >
+                                                    {c}
+                                                </span>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -203,9 +266,8 @@ export default function LearnPartnerBMWFemaleTabletPage() {
                                     Why enforcement matters
                                 </div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    Premium services fail when standards become “optional.” That creates stress,
-                                    complaints, and destroys premium demand. 6ride treats standards as a core
-                                    operating system — and we enforce them.
+                                    Premium services fail when standards become “optional.” That creates stress, complaints, and destroys
+                                    premium demand. 6ride treats standards as a core operating system — and we enforce them.
                                 </p>
                             </div>
                         </Panel>
@@ -301,9 +363,8 @@ export default function LearnPartnerBMWFemaleTabletPage() {
                                     Enforcement note
                                 </div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    If standards are repeatedly violated, we may restrict access, suspend,
-                                    or remove a partner. This protects professional partners and keeps the
-                                    premium tier credible.
+                                    If standards are repeatedly violated, we may restrict access, suspend, or remove a partner. This
+                                    protects professional partners and keeps the premium tier credible.
                                 </p>
                             </div>
                         </Panel>
@@ -391,9 +452,7 @@ export default function LearnPartnerBMWFemaleTabletPage() {
                     <aside className="md:col-span-4">
                         <div className="sticky top-24 space-y-4">
                             <Panel>
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    Next actions
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">Next actions</div>
                                 <div className="mt-3 grid gap-2">
                                     <Link
                                         href="/partner"
@@ -427,18 +486,14 @@ export default function LearnPartnerBMWFemaleTabletPage() {
 
                             <Panel>
                                 <div className="text-[11px] font-semibold text-neutral-900">
-                                    We appreciate your interest in 6Rides Partner Program.
+                                    We appreciate your interest in the 6ride Partner Program.
                                 </div>
                                 <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                     For inquiries or to get started, please contact our partner support team at{" "}
-                                    <a
-                                        href="mailto:partnerships@6rides.com"
-                                        className="text-blue-600 hover:underline"
-                                    >
-                                        partnerships@6rides.com
+                                    <a href="mailto:partnerships@6ride.com" className="text-neutral-900 underline">
+                                        partnerships@6ride.com
                                     </a>
                                 </div>
-                                
                             </Panel>
                         </div>
                     </aside>

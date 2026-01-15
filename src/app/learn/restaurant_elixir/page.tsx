@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -27,8 +28,9 @@ const TILE_BG =
 const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
+/** ✅ LESS BLACK / more transparent hero text card */
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/20 md:bg-black/28 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.14)]";
 
 function Panel({ children }: { children: React.ReactNode }) {
     return (
@@ -88,6 +90,8 @@ function Bullets({ items }: { items: string[] }) {
 }
 
 export default function LearnRestaurantElixirPage() {
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Header */}
@@ -120,36 +124,92 @@ export default function LearnRestaurantElixirPage() {
                             src="/images/6ride/infrastructure/6ride_restaurant_pickup_elixir.png"
                             alt="6ride vehicle at restaurant pickup"
                             fill
-                            className="object-contain md:object-cover"
+                            sizes="(max-width: 768px) 100vw, 1100px"
+                            className="object-cover"
                             priority
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/22 to-transparent" />
+
+                        {/* ✅ LESS BLACK overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/18 to-transparent" />
 
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
-                            <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
+                            <div className={cx(HERO_GLASS, "backdrop-blur-sm md:backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Brand moments • Pickup points
                                 </div>
+
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
                                     Clean pickups at premium venues.
                                 </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    From restaurants to lounges and events — pickup experience matters. 6ride is designed
-                                    to feel premium where people actually live and socialize: clean arrival, calm coordination,
-                                    and professional behavior that protects the moment.
-                                </p>
 
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Clean arrival", "Calm pickup culture", "Professional conduct", "Premium venues"].map(
-                                        (c) => (
-                                            <span
-                                                key={c}
-                                                className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
-                                            >
-                                                {c}
-                                            </span>
-                                        )
-                                    )}
+                                {/* ✅ Mobile: Tap to read more */}
+                                <div className="md:hidden">
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileExpanded((v) => !v)}
+                                        className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[12px] font-semibold text-white/90 active:bg-white/15"
+                                        aria-expanded={mobileExpanded}
+                                        aria-controls="hero-mobile-details"
+                                    >
+                                        {!mobileExpanded ? (
+                                            <>
+                                                Tap to read more <span className="text-white/70">▾</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                Tap to collapse <span className="text-white/70">▴</span>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <div
+                                        id="hero-mobile-details"
+                                        className={cx(
+                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
+                                            mobileExpanded ? "mt-2 max-h-[900px] opacity-100" : "max-h-0 opacity-0"
+                                        )}
+                                    >
+                                        <p className="mt-2 text-sm text-white/90 leading-relaxed">
+                                            From restaurants to lounges and events — pickup experience matters. 6ride is designed
+                                            to feel premium where people actually live and socialize: clean arrival, calm coordination,
+                                            and professional behavior that protects the moment.
+                                        </p>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {["Clean arrival", "Calm pickup culture", "Professional conduct", "Premium venues"].map(
+                                                (c) => (
+                                                    <span
+                                                        key={c}
+                                                        className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                    >
+                                                        {c}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ Desktop: always visible */}
+                                <div className="hidden md:block">
+                                    <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
+                                        From restaurants to lounges and events — pickup experience matters. 6ride is designed
+                                        to feel premium where people actually live and socialize: clean arrival, calm coordination,
+                                        and professional behavior that protects the moment.
+                                    </p>
+
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {["Clean arrival", "Calm pickup culture", "Professional conduct", "Premium venues"].map(
+                                            (c) => (
+                                                <span
+                                                    key={c}
+                                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
+                                                >
+                                                    {c}
+                                                </span>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -199,9 +259,7 @@ export default function LearnRestaurantElixirPage() {
                             </div>
 
                             <div className="mt-6 rounded-2xl border border-black/10 bg-neutral-50 p-5">
-                                <div className="text-sm font-semibold text-neutral-950">
-                                    Why this matters
-                                </div>
+                                <div className="text-sm font-semibold text-neutral-950">Why this matters</div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                     Restaurants, lounges, and events are social environments. People care about image,
                                     comfort, and safety. Premium pickup culture protects that — for riders, venues, and the brand.
@@ -234,9 +292,7 @@ export default function LearnRestaurantElixirPage() {
                                 </Tile>
 
                                 <Tile>
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        Use cases
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">Use cases</div>
                                     <Bullets
                                         items={[
                                             "Restaurant pickups and dinner nights",
@@ -251,9 +307,15 @@ export default function LearnRestaurantElixirPage() {
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-3">
                                 {[
-                                    { title: "Best for", body: "Restaurants, lounges, events, date nights, premium social movement." },
+                                    {
+                                        title: "Best for",
+                                        body: "Restaurants, lounges, events, date nights, premium social movement.",
+                                    },
                                     { title: "Feels like", body: "Clean arrival + calm pickup + smooth exit." },
-                                    { title: "Positioning", body: "Premium lifestyle mobility built on conduct and standards." },
+                                    {
+                                        title: "Positioning",
+                                        body: "Premium lifestyle mobility built on conduct and standards.",
+                                    },
                                 ].map((x) => (
                                     <Tile key={x.title}>
                                         <div className="text-sm font-semibold text-neutral-950">{x.title}</div>
@@ -311,9 +373,7 @@ export default function LearnRestaurantElixirPage() {
                             />
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Tile>
-                                    <div className="text-sm font-semibold text-neutral-950">
-                                        What we enforce
-                                    </div>
+                                    <div className="text-sm font-semibold text-neutral-950">What we enforce</div>
                                     <Bullets
                                         items={[
                                             "No harassment, intimidation, or discrimination",
@@ -414,8 +474,6 @@ export default function LearnRestaurantElixirPage() {
                                     ))}
                                 </div>
                             </Panel>
-
-                            
                         </div>
                     </aside>
                 </div>

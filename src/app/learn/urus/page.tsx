@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
@@ -27,8 +28,9 @@ const TILE_BG =
 const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
+/** ✅ Reduced from bg-black/55 → bg-black/22 (still readable, shows image) */
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/25 bg-black/22 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.14)]";
 
 function Panel({ children }: { children: React.ReactNode }) {
     return (
@@ -87,7 +89,40 @@ function Bullets({ items }: { items: string[] }) {
     );
 }
 
+function TapToSeeMore({
+    onClick,
+    className,
+}: {
+    onClick: () => void;
+    className?: string;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={cx(
+                "inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-2 text-[11px] font-semibold text-white hover:bg-white/15 active:scale-[0.99]",
+                className
+            )}
+            aria-label="Tap to see more"
+        >
+            <span className="h-1.5 w-1.5 rounded-full bg-white/85" />
+            Tap to see more
+            <span aria-hidden className="opacity-80">
+                →
+            </span>
+        </button>
+    );
+}
+
 export default function LearnUrusPage() {
+    const [expanded, setExpanded] = useState(false);
+
+    const chips = useMemo(
+        () => ["Comfort-first", "Safety posture", "Highway stability", "Calm travel"],
+        []
+    );
+
     return (
         <main className="min-h-screen bg-white text-black">
             {/* Header */}
@@ -116,31 +151,52 @@ export default function LearnUrusPage() {
                     className="overflow-hidden rounded-3xl border border-black/10 bg-black shadow-[0_18px_55px_rgba(0,0,0,0.14)]"
                 >
                     <div className="relative h-[360px] sm:h-[440px] md:h-[540px]">
+                        {/* ✅ Mobile fit: contain on mobile, cover on md+ */}
                         <Image
                             src="/images/6ride/lifestyle/6ride_highway_performance_urus.png"
                             alt="6ride premium performance vehicle on highway"
                             fill
+                            sizes="(max-width: 768px) 100vw, 1100px"
                             className="object-contain md:object-cover"
                             priority
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/22 to-transparent" />
 
+                        {/* ✅ Keep the cinematic overlay but lighter than before */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/18 to-transparent" />
+
+                        {/* Bottom content */}
                         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
                             <div className={cx(HERO_GLASS, "backdrop-blur-md")}>
                                 <div className="text-[11px] font-semibold tracking-wide text-white/90">
                                     Premium fleet • Highway performance
                                 </div>
+
                                 <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
                                     Premium performance for longer movement.
                                 </h1>
-                                <p className="mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed">
-                                    For highway travel and longer movement, premium comfort changes everything —
-                                    less stress, better control, and a calmer travel experience. The goal is not speed,
-                                    it’s quality, stability, and a safety-first posture.
+
+                                {/* ✅ “Tap to see more” collapse/expand on mobile */}
+                                <p
+                                    className={cx(
+                                        "mt-2 text-sm text-white/90 md:text-[15px] leading-relaxed",
+                                        expanded ? "" : "line-clamp-3 md:line-clamp-none"
+                                    )}
+                                >
+                                    For highway travel and longer movement, premium comfort changes
+                                    everything — less stress, better control, and a calmer travel
+                                    experience. The goal is not speed, it’s quality, stability, and
+                                    a safety-first posture.
                                 </p>
 
+                                {/* ✅ show button only when collapsed (mobile-first) */}
+                                {!expanded && (
+                                    <div className="mt-3 md:hidden">
+                                        <TapToSeeMore onClick={() => setExpanded(true)} />
+                                    </div>
+                                )}
+
                                 <div className="mt-4 flex flex-wrap gap-2">
-                                    {["Comfort-first", "Safety posture", "Highway stability", "Calm travel"].map((c) => (
+                                    {chips.map((c) => (
                                         <span
                                             key={c}
                                             className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white"
@@ -149,6 +205,19 @@ export default function LearnUrusPage() {
                                         </span>
                                     ))}
                                 </div>
+
+                                {/* ✅ collapse back (optional) */}
+                                {expanded && (
+                                    <div className="mt-3 md:hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => setExpanded(false)}
+                                            className="text-[11px] font-semibold text-white/85 underline underline-offset-4 hover:text-white"
+                                        >
+                                            Show less
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -201,8 +270,8 @@ export default function LearnUrusPage() {
                                     Important note on speed
                                 </div>
                                 <p className="mt-2 text-sm text-neutral-800 leading-relaxed">
-                                    Premium does not mean rushing. The priority is stability, safer driving, and calmer travel — especially
-                                    on highways and longer routes.
+                                    Premium does not mean rushing. The priority is stability, safer
+                                    driving, and calmer travel — especially on highways and longer routes.
                                 </p>
                             </div>
                         </Panel>
@@ -249,13 +318,26 @@ export default function LearnUrusPage() {
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-3">
                                 {[
-                                    { title: "Best for", body: "Longer trips, scheduled travel, calm arrivals, comfort-focused movement." },
-                                    { title: "Feels like", body: "More stable travel: clean cabin + safer posture + calmer experience." },
-                                    { title: "Positioning", body: "Premium long-route movement built on standards, not speed." },
+                                    {
+                                        title: "Best for",
+                                        body: "Longer trips, scheduled travel, calm arrivals, comfort-focused movement.",
+                                    },
+                                    {
+                                        title: "Feels like",
+                                        body: "More stable travel: clean cabin + safer posture + calmer experience.",
+                                    },
+                                    {
+                                        title: "Positioning",
+                                        body: "Premium long-route movement built on standards, not speed.",
+                                    },
                                 ].map((x) => (
                                     <Tile key={x.title}>
-                                        <div className="text-sm font-semibold text-neutral-950">{x.title}</div>
-                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{x.body}</div>
+                                        <div className="text-sm font-semibold text-neutral-950">
+                                            {x.title}
+                                        </div>
+                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
+                                            {x.body}
+                                        </div>
                                     </Tile>
                                 ))}
                             </div>
@@ -292,9 +374,15 @@ export default function LearnUrusPage() {
                                     },
                                 ].map((s) => (
                                     <Tile key={s.step}>
-                                        <div className="text-xs font-semibold text-neutral-800">Step {s.step}</div>
-                                        <div className="mt-1 text-sm font-semibold text-neutral-950">{s.title}</div>
-                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{s.body}</div>
+                                        <div className="text-xs font-semibold text-neutral-800">
+                                            Step {s.step}
+                                        </div>
+                                        <div className="mt-1 text-sm font-semibold text-neutral-950">
+                                            {s.title}
+                                        </div>
+                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
+                                            {s.body}
+                                        </div>
                                     </Tile>
                                 ))}
                             </div>
@@ -324,12 +412,18 @@ export default function LearnUrusPage() {
                                 </Tile>
 
                                 <Tile>
-                                    <div className="text-sm font-semibold text-neutral-950">References</div>
+                                    <div className="text-sm font-semibold text-neutral-950">
+                                        References
+                                    </div>
                                     <div className="mt-3 flex flex-wrap gap-2">
                                         <Link className={CHIP} href="/policies/safety" target="_blank">
                                             Safety Guidelines
                                         </Link>
-                                        <Link className={CHIP} href="/policies/insurance-liability" target="_blank">
+                                        <Link
+                                            className={CHIP}
+                                            href="/policies/insurance-liability"
+                                            target="_blank"
+                                        >
                                             Insurance & Liability
                                         </Link>
                                         <Link className={CHIP} href="/policies/terms" target="_blank">
@@ -366,8 +460,12 @@ export default function LearnUrusPage() {
                                     },
                                 ].map((x) => (
                                     <Tile key={x.q}>
-                                        <div className="text-sm font-semibold text-neutral-950">{x.q}</div>
-                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">{x.a}</div>
+                                        <div className="text-sm font-semibold text-neutral-950">
+                                            {x.q}
+                                        </div>
+                                        <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
+                                            {x.a}
+                                        </div>
                                     </Tile>
                                 ))}
                             </div>
@@ -378,7 +476,9 @@ export default function LearnUrusPage() {
                     <aside className="md:col-span-4">
                         <div className="sticky top-24 space-y-4">
                             <Panel>
-                                <div className="text-sm font-semibold text-neutral-950">Next actions</div>
+                                <div className="text-sm font-semibold text-neutral-950">
+                                    Next actions
+                                </div>
                                 <div className="mt-3 grid gap-2">
                                     <Link
                                         href="/"
@@ -410,7 +510,6 @@ export default function LearnUrusPage() {
                                     ))}
                                 </div>
                             </Panel>
-
                         </div>
                     </aside>
                 </div>
