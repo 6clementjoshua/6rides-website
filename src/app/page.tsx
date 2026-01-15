@@ -973,6 +973,15 @@ export default function HomePage() {
             >
               Corporate SLA
             </Link>
+            <Link
+              href="/policies/cookies"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black"
+            >
+              Cookies Policy
+            </Link>
+
           </div>
 
           <div className="mt-8 text-center text-xs text-black/50">
