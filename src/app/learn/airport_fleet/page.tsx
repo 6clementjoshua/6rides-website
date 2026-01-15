@@ -118,7 +118,7 @@ export default function LearnAirportFleetPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
                     className={cx(
-                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        "overflow-hidden rounded-3xl border border-black/80 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
                         // ✅ Mobile transparent background avoids any “outer color” showing
                         "bg-transparent md:bg-black"
                     )}
