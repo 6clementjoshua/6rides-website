@@ -29,7 +29,7 @@ const CHIP =
     "rounded-full border border-black/15 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-900 shadow-[0_10px_22px_rgba(0,0,0,0.06)]";
 
 const HERO_GLASS =
-    "max-w-3xl rounded-2xl border border-white/30 bg-black/55 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
+    "max-w-3xl rounded-2xl border border-white/30 bg-black/25 p-4 md:p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)]";
 
 function Panel({ children }: { children: React.ReactNode }) {
     return (
@@ -118,7 +118,7 @@ export default function LearnAirportFleetPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: easeOut }}
                     className={cx(
-                        "overflow-hidden rounded-3xl border border-black/80 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
+                        "overflow-hidden rounded-3xl border border-black/10 shadow-[0_18px_55px_rgba(0,0,0,0.14)]",
                         // ✅ Mobile transparent background avoids any “outer color” showing
                         "bg-transparent md:bg-black"
                     )}
