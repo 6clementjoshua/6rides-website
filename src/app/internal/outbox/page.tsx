@@ -7,27 +7,18 @@ import { emailShell } from "@/lib/email/shell";
 import { renderTemplate, templateKeys, type TemplateKey } from "@/lib/email/templates";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
-
-
 export default function OutboxPage() {
-
+    // Session / debug
     const [sessionChecked, setSessionChecked] = useState(false);
     const [isAuthed, setIsAuthed] = useState(false);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [sessionJson, setSessionJson] = useState<string>("");
 
-    useEffect(() => {
-        supabaseBrowser.auth.getSession().then(({ data }) => {
-            setIsAuthed(!!data.session);
-            setSessionChecked(true);
-        });
-
-        const { data: sub } = supabaseBrowser.auth.onAuthStateChange((_event, session) => {
-            setIsAuthed(!!session);
-            setSessionChecked(true);
-        });
-
-        return () => sub.subscription.unsubscribe();
-    }, []);
-
+    // Inline login (only shown if not logged in)
+    const [loginEmail, setLoginEmail] = useState("");
+    const [loginPassword, setLoginPassword] = useState("");
+    const [loginMsg, setLoginMsg] = useState<string | null>(null);
+    const [loggingIn, setLoggingIn] = useState(false);
 
     // Template controls
     const [templateKey, setTemplateKey] = useState<TemplateKey>("custom");
@@ -79,6 +70,72 @@ export default function OutboxPage() {
     const [sending, setSending] = useState(false);
 
     const isBooking = templateKey === "booking_update";
+
+    // Load session and keep it updated
+    useEffect(() => {
+        let mounted = true;
+
+        async function load() {
+            const { data, error } = await supabaseBrowser.auth.getSession();
+            if (!mounted) return;
+
+            const session = data.session ?? null;
+            setIsAuthed(!!session);
+            setUserEmail(session?.user?.email ?? null);
+            setSessionChecked(true);
+            setSessionJson(JSON.stringify({ session, error }, null, 2));
+        }
+
+        load();
+
+        const { data: sub } = supabaseBrowser.auth.onAuthStateChange((_event, session) => {
+            if (!mounted) return;
+            setIsAuthed(!!session);
+            setUserEmail(session?.user?.email ?? null);
+            setSessionChecked(true);
+            setSessionJson(JSON.stringify({ session }, null, 2));
+        });
+
+        return () => {
+            mounted = false;
+            sub.subscription.unsubscribe();
+        };
+    }, []);
+
+    async function login() {
+        setLoginMsg(null);
+        setLoggingIn(true);
+        try {
+            const e = loginEmail.trim();
+            if (!e) {
+                setLoginMsg("Enter your email.");
+                return;
+            }
+            if (!loginPassword) {
+                setLoginMsg("Enter your password.");
+                return;
+            }
+
+            const { error } = await supabaseBrowser.auth.signInWithPassword({
+                email: e,
+                password: loginPassword,
+            });
+
+            if (error) {
+                setLoginMsg(error.message);
+                return;
+            }
+
+            setLoginMsg("Logged in ✅");
+            setLoginPassword("");
+        } finally {
+            setLoggingIn(false);
+        }
+    }
+
+    async function logout() {
+        await supabaseBrowser.auth.signOut();
+    }
 
     const vars = useMemo(() => {
         if (!isBooking) {
@@ -156,8 +213,8 @@ export default function OutboxPage() {
         setSending(true);
         try {
             const { data } = await supabaseBrowser.auth.getSession();
-
             const token = data.session?.access_token;
+
             if (!token) {
                 setStatus("You must be logged in (Supabase) to use Outbox.");
                 return;
@@ -179,7 +236,6 @@ export default function OutboxPage() {
                     return;
                 }
             } else {
-                // custom template should have content
                 if (templateKey === "custom" && !messageHtml.trim()) {
                     setStatus("Custom message cannot be empty.");
                     return;
@@ -229,8 +285,72 @@ export default function OutboxPage() {
             <meta name="googlebot" content="noindex,nofollow,noarchive" />
 
             <div className="mx-auto max-w-6xl px-6 py-10">
-                <h1 className="text-2xl font-semibold">6ride Outbox Mail</h1>
-                <p className="mt-1 text-sm text-black/60">Internal only. Supabase admin + PIN required.</p>
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-semibold">6ride Outbox Mail</h1>
+                        <p className="mt-1 text-sm text-black/60">Internal only. Supabase admin + PIN required.</p>
+                    </div>
+
+                    <div className="text-right">
+                        <div className="text-xs text-black/60">Auth</div>
+                        <div className="text-sm font-semibold">
+                            {sessionChecked ? (isAuthed ? "Logged in" : "Not logged in") : "Checking..."}
+                        </div>
+                        <div className="text-xs text-black/60">{userEmail ?? "—"}</div>
+
+                        {isAuthed && (
+                            <button
+                                onClick={logout}
+                                className="mt-2 rounded-xl border border-black/15 px-3 py-2 text-xs font-semibold"
+                            >
+                                Log out
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Inline login box if not logged in */}
+                {sessionChecked && !isAuthed && (
+                    <div className="mt-6 rounded-2xl border border-black/10 p-5 shadow-sm">
+                        <div className="text-sm font-semibold">Admin Login (Supabase)</div>
+                        <p className="mt-1 text-xs text-black/60">
+                            Sign in with the same Supabase admin email that is in <b>OUTBOX_ADMIN_EMAILS</b>.
+                        </p>
+
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                            <input
+                                value={loginEmail}
+                                onChange={(e) => setLoginEmail(e.target.value)}
+                                placeholder="admin email"
+                                className="rounded-xl border border-black/15 px-3 py-2 outline-none focus:ring-2 focus:ring-black/10"
+                            />
+                            <input
+                                value={loginPassword}
+                                onChange={(e) => setLoginPassword(e.target.value)}
+                                placeholder="password"
+                                type="password"
+                                className="rounded-xl border border-black/15 px-3 py-2 outline-none focus:ring-2 focus:ring-black/10"
+                            />
+                        </div>
+
+                        <div className="mt-3 flex items-center gap-3">
+                            <button
+                                onClick={login}
+                                disabled={loggingIn}
+                                className="rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                            >
+                                {loggingIn ? "Signing in..." : "Sign in"}
+                            </button>
+
+                            {loginMsg && <div className="text-sm text-black/70">{loginMsg}</div>}
+                        </div>
+
+                        <details className="mt-4 rounded-xl border border-black/10 bg-white px-3 py-2">
+                            <summary className="cursor-pointer text-sm font-semibold">Session debug</summary>
+                            <pre className="mt-2 overflow-auto text-xs">{sessionJson}</pre>
+                        </details>
+                    </div>
+                )}
 
                 <div className="mt-8 grid gap-6 lg:grid-cols-2">
                     {/* Composer */}
@@ -532,7 +652,6 @@ export default function OutboxPage() {
                                     </div>
                                 </div>
                             ) : (
-                                // NON-BOOKING: show message box
                                 <label className="grid gap-1">
                                     <span className="text-xs font-semibold text-black/70">Message HTML (body only)</span>
                                     <textarea
@@ -546,11 +665,17 @@ export default function OutboxPage() {
 
                             <button
                                 onClick={send}
-                                disabled={sending}
+                                disabled={sending || (sessionChecked && !isAuthed)}
                                 className="rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
                             >
                                 {sending ? "Sending..." : "Send Email"}
                             </button>
+
+                            {sessionChecked && !isAuthed && (
+                                <div className="rounded-xl border border-black/10 bg-black/5 px-3 py-2 text-sm">
+                                    You must sign in above before you can send.
+                                </div>
+                            )}
 
                             {status && (
                                 <div className="rounded-xl border border-black/10 bg-black/5 px-3 py-2 text-sm">{status}</div>
