@@ -593,10 +593,10 @@ export default function LearnPartnerMalePhonePage() {
                                     <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                         Please contact our partnership team at{" "}
                                         <a
-                                            href="mailto:partnerships@6ride.com"
+                                            href="mailto:partner@6ride.com"
                                             className="font-semibold text-neutral-900 hover:text-neutral-800"
                                         >
-                                            partnerships@6ride.com
+                                            partner@6ride.com
                                         </a>
                                     </div>
                                 </div>

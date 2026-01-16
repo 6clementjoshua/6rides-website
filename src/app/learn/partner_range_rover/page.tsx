@@ -451,8 +451,8 @@ export default function LearnPartnerRangeRoverPage() {
                                 </div>
                                 <div className="mt-2 text-sm text-neutral-800 leading-relaxed">
                                     For inquiries or to get started, please contact our partner team at{" "}
-                                    <a href="mailto:partnerships@6ride.com" className="text-neutral-900 underline">
-                                        partnerships@6ride.com
+                                    <a href="mailto:partner@6ride.com" className="text-neutral-900 underline">
+                                        partner@6ride.com
                                     </a>
                                 </div>
                             </Panel>
