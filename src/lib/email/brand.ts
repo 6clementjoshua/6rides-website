@@ -4,8 +4,9 @@ export const BRAND = {
     siteUrl: "https://www.6rides.com",
 
     // Your existing logo URL (keep it exactly as you already use)
-    logoUrl:
-        "https://bhgasznglvennqqqthvs.supabase.co/storage/v1/object/public/public-assets/6logo.PNG",
+    logoUrl: "https://www.6rides.com/email/6logo.PNG",
+
+
 
     // Footer links (update paths if yours differ)
     links: {
