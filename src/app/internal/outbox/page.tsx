@@ -1,17 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useEffect, useMemo, useState } from "react";
+
 import { ALLOWED_FROM } from "@/lib/email/from";
 import { emailShell } from "@/lib/email/shell";
 import { renderTemplate, templateKeys, type TemplateKey } from "@/lib/email/templates";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+
 
 export default function OutboxPage() {
+
+    const [sessionChecked, setSessionChecked] = useState(false);
+    const [isAuthed, setIsAuthed] = useState(false);
+
+    useEffect(() => {
+        supabaseBrowser.auth.getSession().then(({ data }) => {
+            setIsAuthed(!!data.session);
+            setSessionChecked(true);
+        });
+
+        const { data: sub } = supabaseBrowser.auth.onAuthStateChange((_event, session) => {
+            setIsAuthed(!!session);
+            setSessionChecked(true);
+        });
+
+        return () => sub.subscription.unsubscribe();
+    }, []);
+
+
     // Template controls
     const [templateKey, setTemplateKey] = useState<TemplateKey>("custom");
     const [customerName, setCustomerName] = useState("");
@@ -138,7 +155,8 @@ export default function OutboxPage() {
         setStatus(null);
         setSending(true);
         try {
-            const { data } = await supabase.auth.getSession();
+            const { data } = await supabaseBrowser.auth.getSession();
+
             const token = data.session?.access_token;
             if (!token) {
                 setStatus("You must be logged in (Supabase) to use Outbox.");
