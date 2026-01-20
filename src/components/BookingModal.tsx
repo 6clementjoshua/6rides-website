@@ -81,7 +81,7 @@ function seededPick<T>(seed: number, arr: T[], count: number) {
 
 function buildBenefits(vehicle: BookingVehicle) {
     const price = vehicle.priceNgn ?? 200_000;
-    const seed = hashSeed(vehicle.uid || vehicle.name || "6rides");
+    const seed = hashSeed(vehicle.uid || vehicle.name || "6ride");
 
     const is200kPlus = price >= 200_000;
     const is600kPlus = price >= 600_000;
@@ -262,7 +262,7 @@ export default function BookingModal({
 
             const message =
                 data?.availability_message ??
-                `Hello ${name}. Sorry, this ride is in use. ${selected.name} is currently unavailable due to high demand and ongoing orders. Please try other rides and do well to book early next time. Thank you — 6Rides.`;
+                `Hello ${name}. Sorry, this ride is in use. ${selected.name} is currently unavailable due to high demand and ongoing orders. Please try other rides and do well to book early next time. Thank you — 6Ride.`;
 
             setAttemptId(data?.attempt_id ?? null);
             setResultMsg(message);
@@ -284,7 +284,7 @@ export default function BookingModal({
     function scheduleAnswer(answer: "yes" | "no") {
         if (answer === "no") {
             setScheduleResult(
-                "Scheduling is reserved for returning customers. New customers can only book a ride. Thank you — 6Rides."
+                "Scheduling is reserved for returning customers. New customers can only book a ride. Thank you — 6Ride."
             );
             setStep("schedule_result");
             return;
@@ -294,7 +294,7 @@ export default function BookingModal({
 
     function submitScheduleForm() {
         setScheduleResult(
-            "Not found. We could not verify your past ride history at this time. Scheduling is unavailable right now. This verification helps us serve returning customers properly. Thank you — 6Rides."
+            "Not found. We could not verify your past ride history at this time. Scheduling is unavailable right now. This verification helps us serve returning customers properly. Thank you — 6Ride."
         );
         setStep("schedule_result");
     }
@@ -351,14 +351,14 @@ export default function BookingModal({
                                             <div className="flex items-center gap-3 min-w-0">
                                                 <Image
                                                     src="/6logo.PNG"
-                                                    alt="6Rides"
+                                                    alt="6Ride"
                                                     width={38}
                                                     height={38}
                                                     className="h-10 w-10 rounded-2xl bg-white p-2"
                                                 />
                                                 <div className="min-w-0">
                                                     <div className="text-sm font-semibold text-white/80">
-                                                        6Rides
+                                                        6Ride
                                                     </div>
                                                     <div className="text-lg font-semibold">Booking</div>
                                                 </div>
@@ -657,7 +657,7 @@ export default function BookingModal({
                                                             Schedule a trip
                                                         </div>
                                                         <div className="mt-3 text-sm text-white/75 leading-relaxed">
-                                                            Have you ridden with 6Rides before? Scheduling is
+                                                            Have you ridden with 6Ride before? Scheduling is
                                                             only available for returning customers.
                                                         </div>
 

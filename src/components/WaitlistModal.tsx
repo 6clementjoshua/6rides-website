@@ -106,9 +106,9 @@ export default function WaitlistModal({ open, onClose, source = "hero" }: Props)
                     >
                         <div className="flex items-start justify-between gap-3">
                             <div>
-                                <div className="text-lg font-semibold text-white">Join the 6Rides Waitlist</div>
+                                <div className="text-lg font-semibold text-white">Join the 6Ride Waitlist</div>
                                 <div className="mt-1 text-sm text-white/60">
-                                    Get early access to the 6Rides app and premium features.
+                                    Get early access to the 6Ride app and premium features.
                                 </div>
                             </div>
 
@@ -158,7 +158,7 @@ export default function WaitlistModal({ open, onClose, source = "hero" }: Props)
 
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="text-xs text-white/45">
-                                    By joining, you agree to be contacted about 6Rides updates.
+                                    By joining, you agree to be contacted about 6Ride updates.
                                 </div>
 
                                 <button
