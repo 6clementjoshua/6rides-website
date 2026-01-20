@@ -1,6 +1,6 @@
 {
-    "name": "6Rides",
-    "short_name": "6Rides",
+    "name": "6Ride",
+    "short_name": "6Ride",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#000000",

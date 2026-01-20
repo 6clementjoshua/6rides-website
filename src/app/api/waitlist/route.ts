@@ -64,7 +64,7 @@ const WAITLIST_EMAIL_HTML = `
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
   <meta name="supported-color-schemes" content="light dark" />
-  <title>You're on the 6Rides Waitlist</title>
+  <title>You're on the 6Ride Waitlist</title>
 
   <style>
     body {
@@ -103,7 +103,7 @@ const WAITLIST_EMAIL_HTML = `
                 src="https://bhgasznglvennqqqthvs.supabase.co/storage/v1/object/public/public-assets/6logo.PNG"
                 width="56"
                 height="56"
-                alt="6Rides"
+                alt="6Ride"
                 class="logo-wrap"
                 style="
                   display:block;
@@ -127,7 +127,7 @@ const WAITLIST_EMAIL_HTML = `
           <tr>
             <td align="center" style="padding:10px 18px 26px;">
               <div class="text" style="font-size:18px;line-height:1.6;max-width:520px;">
-                Thanks for joining <b>6Rides</b>.
+                Thanks for joining <b>6Ride</b>.
                 We’ll email you the moment the app is live on the stores.
               </div>
             </td>
@@ -147,7 +147,7 @@ const WAITLIST_EMAIL_HTML = `
                 border:1px solid rgba(0,0,0,.08);
                 box-shadow:0 18px 40px rgba(0,0,0,.35);
               ">
-                Visit 6Rides
+                Visit 6Ride
               </a>
             </td>
           </tr>
@@ -157,7 +157,7 @@ const WAITLIST_EMAIL_HTML = `
               <div class="muted" style="font-size:14px;line-height:1.7;">
                 6Clement Joshua<br/>
                 Calabar, Nigeria<br/>
-                © 6Rides. All rights reserved.
+                © 6Ride. All rights reserved.
               </div>
             </td>
           </tr>

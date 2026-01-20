@@ -428,7 +428,7 @@ export default function ContactPage() {
                     </div>
 
                     <div className="mt-8 text-center text-xs text-black/50">
-                        © {new Date().getFullYear()} 6Rides. A 6Clement Joshua Service. All rights reserved.
+                        © {new Date().getFullYear()} 6Ride. A 6Clement Joshua Service. All rights reserved.
                     </div>
                 </div>
             </footer>

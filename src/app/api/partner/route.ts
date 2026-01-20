@@ -3,7 +3,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = "6Rides <no-reply@6rides.com>";
+const FROM = "6Ride <no-reply@6rides.com>";
 const ADMIN_TO = process.env.PARTNER_ADMIN_EMAIL || "partners@6rides.com";
 
 export async function POST(req: Request) {
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         await resend.emails.send({
             from: FROM,
             to: normalizedEmail,
-            subject: "6Rides Partner Application Received",
+            subject: "6Ride Partner Application Received",
             html: partnerApplicantEmailHTML({ fullName }),
         });
 
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         await resend.emails.send({
             from: FROM,
             to: ADMIN_TO,
-            subject: "New 6Rides Partner Application",
+            subject: "New 6Ride Partner Application",
             html: partnerAdminEmailHTML({
                 fullName,
                 email: normalizedEmail,
@@ -68,18 +68,18 @@ function partnerApplicantEmailHTML({ fullName }: { fullName: string }) {
   <body style="margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#ffffff;color:#0b0b0f;">
     <div style="max-width:620px;margin:0 auto;padding:40px 16px;">
       <img src="https://bhgasznglvennqqqthvs.supabase.co/storage/v1/object/public/public-assets/6logo.PNG"
-        width="56" height="56" alt="6Rides"
+        width="56" height="56border-radius"
         style="display:block;border-radius:16px;padding:10px;background:#ffffff;box-shadow:0 10px 30px rgba(0,0,0,.18);" />
       <h1 style="margin:22px 0 10px;font-size:34px;letter-spacing:-0.02em;">Application received</h1>
       <p style="margin:0 0 14px;font-size:16px;line-height:1.7;color:#3a3a3a;">
         Hello ${escapeHtml(fullName)},<br/>
-        We received your 6Rides Partner Fleet application. Our team will review it and contact you.
+        We received your 6Ride Partner Fleet application. Our team will review it and contact you.
       </p>
       <a href="https://6rides.com/partners" style="display:inline-block;margin-top:14px;padding:14px 22px;border-radius:999px;background:#0b0b0f;color:#ffffff;text-decoration:none;font-weight:700;">
         View Partner Program
       </a>
       <p style="margin:26px 0 0;font-size:12px;color:#6b6b6b;">
-        6Rides. A 6clement Joshua service
+        6Ride. A 6clement Joshua service
       </p>
     </div>
   </body>
@@ -101,7 +101,7 @@ function partnerAdminEmailHTML(data: any) {
         <div><b>Vehicle:</b> ${escapeHtml(data.vehicleYear)} ${escapeHtml(data.vehicleMake)} ${escapeHtml(data.vehicleModel)} (${escapeHtml(data.vehicleType)})</div>
         <div style="margin-top:10px;"><b>Notes:</b> ${escapeHtml(data.notes || "—")}</div>
       </div>
-      <p style="margin:16px 0 0;font-size:12px;color:#6b6b6b;">6Rides. A 6clement Joshua service</p>
+      <p style="margin:16px 0 0;font-size:12px;color:#6b6b6b;">6Ride. A 6clement Joshua service</p>
     </div>
   </body>
 </html>`;

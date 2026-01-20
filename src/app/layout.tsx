@@ -18,10 +18,10 @@ const geistMono = Geist_Mono({
 // Update this when your final domain is ready
 const SITE_URL = "https://www.6rides.com";
 
-const APP_NAME = "6Rides";
-const TITLE = "6Rides — Premium mobility, built for modern Nigeria";
+const APP_NAME = "6Ride";
+const TITLE = "6Ride — Premium mobility, built for modern Nigeria";
 const DESCRIPTION =
-  "6Rides is a premium ride-hailing brand in Nigeria with verified drivers, emergency support, partner-listed premium vehicles, and seamless online booking. Cross River (HQ), Abuja, Lagos, Port Harcourt, and Akwa Ibom.";
+  "6Ride is a premium ride-hailing brand in Nigeria with verified drivers, emergency support, partner-listed premium vehicles, and seamless online booking. Cross River (HQ), Abuja, Lagos, Port Harcourt, and Akwa Ibom.";
 
 const OG_IMAGE = "/og-6ride.png";
 const TW_IMAGE = "/twitter-6ride.png";
@@ -31,14 +31,14 @@ export const metadata: Metadata = {
 
   title: {
     default: TITLE,
-    template: "%s — 6Rides",
+    template: "%s — 6Ride",
   },
 
   description: DESCRIPTION,
   applicationName: APP_NAME,
 
   keywords: [
-    "6Rides",
+    "6Ride",
     "6Ride",
     "ride hailing Nigeria",
     "premium ride Nigeria",
@@ -61,11 +61,11 @@ export const metadata: Metadata = {
     "ride booking app Nigeria",
     "safe rides Nigeria",
     "comfortable rides Nigeria",
-    "6Rides terms",
-    "6Rides privacy",
-    "6Rides safety",
-    "6Rides insurance",
-    "6Rides liability",
+    "6Ride terms",
+    "6Ride privacy",
+    "6Ride safety",
+    "6Ride insurance",
+    "6Ride liability",
     "Tinapa rides",
     "Port Harcourt airport rides",
     "Uyo rides",
@@ -253,9 +253,9 @@ export const metadata: Metadata = {
 
   ],
 
-  authors: [{ name: "6Rides" }],
-  creator: "6Rides",
-  publisher: "6Rides",
+  authors: [{ name: "6Ride" }],
+  creator: "6Ride",
+  publisher: "6Ride",
   category: "Transportation",
 
   alternates: {
@@ -274,7 +274,7 @@ export const metadata: Metadata = {
         url: OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: "6Rides — Premium mobility, built for modern Nigeria",
+        alt: "6Ride — Premium mobility, built for modern Nigeria",
       },
     ],
   },

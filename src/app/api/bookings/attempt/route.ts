@@ -60,7 +60,7 @@ function bookingEmailHTML(args: {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
   <meta name="supported-color-schemes" content="light dark" />
-  <title>6Rides Booking Update</title>
+  <title>6Ride Booking Update</title>
   <style>
     body {margin:0;padding:0;background-color:#ffffff;color:#0b0b0f;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
     .container {background-color:#ffffff;}
@@ -103,7 +103,7 @@ function bookingEmailHTML(args: {
           <tr>
             <td align="center" style="padding:10px 0 18px;">
               <img src="https://bhgasznglvennqqqthvs.supabase.co/storage/v1/object/public/public-assets/6logo.PNG"
-                width="56" height="56" alt="6Rides"
+                width="56" height="56" alt="6Ride"
                 style="display:block;border-radius:16px;padding:10px;background:#ffffff;box-shadow:0 10px 30px rgba(0,0,0,.25);" />
             </td>
           </tr>
@@ -117,7 +117,7 @@ function bookingEmailHTML(args: {
           <tr>
             <td align="center" style="padding:8px 18px 18px;">
               <div class="text" style="font-size:17px;line-height:1.65;max-width:560px;">
-                Hello <b>${escapeHtml(args.customer_name)}</b>, thank you for choosing <b>6Rides</b>.
+                Hello <b>${escapeHtml(args.customer_name)}</b>, thank you for choosing <b>6Ride</b>.
                 We received your booking attempt and reviewed availability.
               </div>
             </td>
@@ -184,7 +184,7 @@ function bookingEmailHTML(args: {
                 <tr>
                   <td style="padding:16px 18px 18px;">
                     <div class="text" style="font-size:14px;line-height:1.7;">
-                      Want an update the moment <b>6Rides</b> becomes available? Subscribe and we’ll notify you first.
+                      Want an update the moment <b>6Ride</b> becomes available? Subscribe and we’ll notify you first.
                     </div>
 
                     <div style="text-align:center;padding:14px 0 0;">
@@ -192,7 +192,7 @@ function bookingEmailHTML(args: {
                     </div>
 
                     <div style="text-align:center;padding:12px 0 0;">
-                      <a href="https://6rides.com" class="btn">Visit 6Rides</a>
+                      <a href="https://6rides.com" class="btn">Visit 6Ride</a>
                     </div>
                   </td>
                 </tr>
@@ -205,8 +205,8 @@ function bookingEmailHTML(args: {
             <td align="center" style="padding:18px 18px 6px;">
               <div class="muted" style="font-size:14px;line-height:1.7;">
                 6Clement Joshua<br />
-                Calabar, Nigeria<br />
-                © 6Rides. All rights reserved.
+                Calabar, NNigeriaria<br />
+                © 6Ride. All rights reserved.
               </div>
             </td>
           </tr>
@@ -239,7 +239,7 @@ export async function POST(req: Request) {
 
         // Prefer a known-good verified sender like your waitlist route.
         // If RESEND_FROM is present, use it; otherwise fallback.
-        const RESEND_FROM = process.env.RESEND_FROM || "6Rides <no-reply@6rides.com>";
+        const RESEND_FROM = process.env.RESEND_FROM || "6Ride <no-reply@6rides.com>";
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
             auth: { persistSession: false },
@@ -271,8 +271,7 @@ export async function POST(req: Request) {
 
         const availability_message =
             `Hello ${name}. Sorry, this ride is in use. ${vehicle.name} is currently unavailable due to high demand and ongoing orders. ` +
-            `Please try other rides and do well to book early next time. Thank you — 6Rides.`;
-
+            `Please try other rides and do well to book early next time. Thank you — 6Ride.`;
         const carImageAbs =
             `${SITE_URL}${String(vehicle.image ?? "").startsWith("/") ? vehicle.image : `/${vehicle.image}`}`;
 
@@ -325,7 +324,7 @@ export async function POST(req: Request) {
         const { data: sent, error: sendErr } = await resend.emails.send({
             from: RESEND_FROM,
             to: email, // keep same as waitlist (string), not array
-            subject: "6Rides Booking Update — Unavailable right now",
+            subject: "6Ride Booking Update — Unavailable right now",
             html,
         });
 

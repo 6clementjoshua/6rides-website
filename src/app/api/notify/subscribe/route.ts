@@ -68,10 +68,10 @@ function pageHtml(title: string, message: string) {
 <body>
   <div class="wrap">
     <div class="card">
-      <img class="logo" src="https://bhgasznglvennqqqthvs.supabase.co/storage/v1/object/public/public-assets/6logo.PNG" alt="6Rides" />
+      <img class="logo" src="https://bhgasznglvennqqqthvs.supabase.co/storage/v1/object/public/public-assets/6logo.PNG" alt="6Ride" />
       <div class="h">${escapeHtml(title)}</div>
       <div class="p">${escapeHtml(message)}</div>
-      <a class="btn" href="https://6rides.com">Back to 6Rides</a>
+      <a class="btn" href="https://6rides.com">Back to 6Ride</a>
     </div>
   </div>
 </body>
@@ -120,7 +120,7 @@ export async function GET(req: Request) {
 
         await supabase.from("booking_attempts").update({ subscribe_opt_in: true }).eq("id", payload.attempt_id);
 
-        return new NextResponse(pageHtml("Subscribed", "You will be notified when 6Rides becomes available. Thank you."), {
+        return new NextResponse(pageHtml("Subscribed", "You will be notified when 6Ride becomes available. Thank you."), {
             status: 200,
             headers: { "content-type": "text/html; charset=utf-8" },
         });
